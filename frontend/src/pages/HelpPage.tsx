@@ -1,0 +1,32 @@
+import React from 'react';
+import { HelpCircle } from 'lucide-react';
+
+const HelpPage: React.FC = () => {
+  return (
+    <div className="min-h-screen pt-16" style={{backgroundColor: '#0A0A0F'}}>
+      <section className="relative py-24 dark-gradient dark-pattern overflow-hidden">
+        <div className="absolute inset-0" style={{backgroundColor: 'rgba(10, 10, 15, 0.5)'}}></div>
+        
+        <div className="relative container text-center">
+          <div className="bg-accent/10 w-20 h-20 rounded-xl flex items-center justify-center mb-6 mx-auto">
+            <HelpCircle className="h-10 w-10 text-accent" />
+          </div>
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-100 mb-8">
+            <span className="gradient-text">Help</span>
+            <span className="block text-gray-100">& Support</span>
+          </h1>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-12">
+            Find answers to your questions and get the support you need.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <button className="btn-primary">Contact Support</button>
+            <button className="btn-secondary">Browse FAQ</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default HelpPage; 

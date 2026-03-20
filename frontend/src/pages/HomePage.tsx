@@ -1,15 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, MapPin, Home as HomeIcon, Star, ChevronRight, 
   Shield, Clock, Users, Award, Bed, Bath, Square, Heart, Mail
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const HomePage: React.FC = () => {
   const [searchLocation, setSearchLocation] = useState('');
   const [searchType, setSearchType] = useState('SALE');
   const [priceRange, setPriceRange] = useState('');
+  const [featuredProperties, setFeaturedProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchFeaturedProperties();
+  }, []);
+
+  const fetchFeaturedProperties = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('/properties?limit=4&sortBy=newest');
+      const properties = response.data.properties || response.data;
+      setFeaturedProperties(properties.slice(0, 4));
+    } catch (error) {
+      console.error('Failed to fetch featured properties:', error);
+      // Keep empty array on error
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,49 +73,7 @@ const HomePage: React.FC = () => {
     },
   ];
 
-  // Featured Properties
-  const featuredProperties = [
-    {
-      id: 1,
-      image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&h=400&fit=crop',
-      price: 425000,
-      location: 'Beverly Hills, CA',
-      beds: 4,
-      baths: 3,
-      sqft: 2044,
-      favorite: false,
-    },
-    {
-      id: 2,
-      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&h=400&fit=crop',
-      price: 750000,
-      location: 'San Francisco, CA',
-      beds: 3,
-      baths: 2,
-      sqft: 1680,
-      favorite: false,
-    },
-    {
-      id: 3,
-      image: 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=600&h=400&fit=crop',
-      price: 625000,
-      location: 'Los Angeles, CA',
-      beds: 4,
-      baths: 4,
-      sqft: 2870,
-      favorite: false,
-    },
-    {
-      id: 4,
-      image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=600&h=400&fit=crop',
-      price: 320000,
-      location: 'Austin, TX',
-      beds: 3,
-      baths: 2,
-      sqft: 1450,
-      favorite: false,
-    },
-  ];
+  // Featured Properties are now fetched from the backend
 
   // Testimonials
   const testimonials = [
@@ -121,13 +100,15 @@ const HomePage: React.FC = () => {
     },
   ];
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
+  const formatPrice = (price: number, listingType?: string) => {
+    const formatted = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price);
+    
+    return listingType === 'RENT' ? `${formatted}/month` : formatted;
   };
 
   const formatNumber = (num: number) => {
@@ -272,70 +253,88 @@ const HomePage: React.FC = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProperties.map((property) => (
-              <div
-                key={property.id}
-                className="property-card cursor-pointer"
-                onClick={() => navigate(`/properties/${property.id}`)}
-              >
-                {/* Property Image */}
-                <div className="relative overflow-hidden h-64">
-                  <img
-                    src={property.image}
-                    alt={property.location}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                  />
-                  
-                  {/* Favorite Button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Toggle favorite logic
-                    }}
-                    className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-soft hover:shadow-medium transition-all"
-                  >
-                    <Heart className={`h-5 w-5 ${property.favorite ? 'fill-red-500 text-red-500' : 'text-dark-muted'}`} />
-                  </button>
+          {loading ? (
+            <div className="col-span-full flex justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-sand border-t-dark"></div>
+            </div>
+          ) : featuredProperties.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <HomeIcon className="h-16 w-16 mx-auto text-dark-muted opacity-50 mb-4" />
+              <p className="text-dark-muted">No properties available at the moment.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProperties.map((property) => (
+                <div
+                  key={property._id}
+                  className="property-card cursor-pointer"
+                  onClick={() => navigate(`/properties/${property._id}`)}
+                >
+                  {/* Property Image */}
+                  <div className="relative overflow-hidden h-64">
+                    <img
+                      src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop'}
+                      alt={property.title}
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                    />
+                    
+                    {/* Favorite Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Toggle favorite logic
+                      }}
+                      className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-soft hover:shadow-medium transition-all"
+                    >
+                      <Heart className="h-5 w-5 text-dark-muted" />
+                    </button>
 
-                  {/* Location Badge */}
-                  <div className="absolute bottom-4 left-4 flex items-center space-x-1 bg-white rounded-lg px-3 py-2 shadow-soft">
-                    <MapPin className="h-4 w-4 text-dark-muted" />
-                    <span className="text-sm font-medium text-dark">{property.location}</span>
+                    {/* Location Badge */}
+                    <div className="absolute bottom-4 left-4 flex items-center space-x-1 bg-white rounded-lg px-3 py-2 shadow-soft">
+                      <MapPin className="h-4 w-4 text-dark-muted" />
+                      <span className="text-sm font-medium text-dark">{property.city}, {property.state}</span>
+                    </div>
+                  </div>
+
+                  {/* Property Details */}
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-2xl font-bold text-dark">
+                        {formatPrice(property.price, property.listingType)}
+                      </h3>
+                    </div>
+
+                    {/* Property Stats */}
+                    <div className="flex items-center space-x-4 text-dark-muted">
+                      {property.bedrooms !== undefined && (
+                        <div className="flex items-center space-x-1">
+                          <Bed className="h-4 w-4" />
+                          <span className="text-sm font-medium">{property.bedrooms}</span>
+                        </div>
+                      )}
+                      {property.bathrooms !== undefined && (
+                        <div className="flex items-center space-x-1">
+                          <Bath className="h-4 w-4" />
+                          <span className="text-sm font-medium">{property.bathrooms}</span>
+                        </div>
+                      )}
+                      {property.squareFeet && (
+                        <div className="flex items-center space-x-1">
+                          <Square className="h-4 w-4" />
+                          <span className="text-sm font-medium">{formatNumber(property.squareFeet)} sqft</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* CTA Button */}
+                    <button className="w-full mt-6 btn-primary">
+                      View Details
+                    </button>
                   </div>
                 </div>
-
-                {/* Property Details */}
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-2xl font-bold text-dark">
-                      {formatPrice(property.price)}
-                    </h3>
-                  </div>
-
-                  {/* Property Stats */}
-                  <div className="flex items-center space-x-4 text-dark-muted">
-                    <div className="flex items-center space-x-1">
-                      <Bed className="h-4 w-4" />
-                      <span className="text-sm font-medium">{property.beds}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Bath className="h-4 w-4" />
-                      <span className="text-sm font-medium">{property.baths}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Square className="h-4 w-4" />
-                      <span className="text-sm font-medium">{formatNumber(property.sqft)} sqft</span>
-                    </div>
-                  </div>
-
-                  {/* CTA Button */}
-                  <button className="w-full mt-6 btn-primary">
-                    View Details
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          )}
           </div>
 
           {/* View All Button Mobile */}

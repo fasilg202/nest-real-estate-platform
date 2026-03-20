@@ -14,6 +14,7 @@ import ManageRentalsPage from './pages/ManageRentalsPage';
 import AdvertisePage from './pages/AdvertisePage';
 import HelpPage from './pages/HelpPage';
 import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
               <Route path="/properties/:id" element={<PropertyDetailPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
               <Route path="/sell" element={<SellPage />} />
               <Route path="/mortgage" element={<MortgagePage />} />
               <Route path="/agents" element={<AgentsPage />} />

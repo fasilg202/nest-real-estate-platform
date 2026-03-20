@@ -1,4 +1,11 @@
 import { CreatePropertyDto } from './create-property.dto';
+import { IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class PropertyImageDto {
+  url: string;
+  publicId: string;
+}
 
 export class UpdatePropertyDto {
   title?: string;
@@ -26,4 +33,10 @@ export class UpdatePropertyDto {
   features?: string[];
   amenities?: string[];
   status?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PropertyImageDto)
+  images?: PropertyImageDto[];
 } 

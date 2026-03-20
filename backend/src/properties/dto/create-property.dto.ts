@@ -7,8 +7,20 @@ import {
   IsArray,
   IsBoolean,
   Min,
-  MaxLength
+  MaxLength,
+  ValidateNested
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class PropertyImageDto {
+  @IsString()
+  @IsNotEmpty()
+  url: string;
+
+  @IsString()
+  @IsNotEmpty()
+  publicId: string;
+}
 
 export class CreatePropertyDto {
   @IsString()
@@ -113,4 +125,10 @@ export class CreatePropertyDto {
   @IsArray()
   @IsString({ each: true })
   amenities?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PropertyImageDto)
+  images?: PropertyImageDto[];
 } 

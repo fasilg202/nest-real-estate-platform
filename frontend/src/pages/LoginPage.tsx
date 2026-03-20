@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Home, Eye, EyeOff, Mail, Lock, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -13,6 +13,8 @@ const LoginPage: React.FC = () => {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo') || '/dashboard';
 
   useEffect(() => {
     setIsVisible(true);
@@ -25,7 +27,7 @@ const LoginPage: React.FC = () => {
 
     try {
       await login(email, password);
-      navigate('/dashboard');
+      navigate(returnTo);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to login');
     } finally {
@@ -47,7 +49,7 @@ const LoginPage: React.FC = () => {
 
     try {
       await login(demoEmail, demoPassword);
-      navigate('/dashboard');
+      navigate(returnTo);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to login');
     } finally {

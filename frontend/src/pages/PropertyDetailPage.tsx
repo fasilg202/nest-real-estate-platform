@@ -101,9 +101,28 @@ const PropertyDetailPage: React.FC = () => {
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle contact form submission
-    console.log('Contact form submitted:', contactForm);
-    setShowContactForm(false);
+    
+    try {
+      await axios.post('/contacts', {
+        propertyId: property?._id,
+        name: contactForm.name,
+        email: contactForm.email,
+        phone: contactForm.phone,
+        message: contactForm.message
+      });
+      
+      alert('Message sent successfully! The property owner will contact you soon.');
+      setShowContactForm(false);
+      setContactForm({
+        name: user?.firstName + ' ' + user?.lastName || '',
+        email: user?.email || '',
+        phone: user?.phone || '',
+        message: ''
+      });
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      alert('Failed to send message. Please try again.');
+    }
   };
 
   const formatPrice = (price: number, listingType: string) => {

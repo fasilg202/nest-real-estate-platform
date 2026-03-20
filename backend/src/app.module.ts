@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { PropertiesModule } from './properties/properties.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { ContactsModule } from './contacts/contacts.module';
+import { FavoritesModule } from './favorites/favorites.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ContactsModule } from './contacts/contacts.module';
     PropertiesModule,
     UploadsModule,
     ContactsModule,
+    FavoritesModule,
   ],
 })
 export class AppModule {} 

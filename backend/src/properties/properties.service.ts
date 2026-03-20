@@ -23,13 +23,16 @@ export class PropertiesService {
   async findAll(query: any = {}) {
     const { 
       city, 
-      state, 
+      state,
+      address,
+      neighborhood,
       propertyType, 
       listingType, 
       minPrice, 
       maxPrice,
       bedrooms,
       bathrooms,
+      sort,
       limit = 20,
       offset = 0 
     } = query;
@@ -38,6 +41,8 @@ export class PropertiesService {
 
     if (city) filter.city = new RegExp(city, 'i');
     if (state) filter.state = new RegExp(state, 'i');
+    if (address) filter.address = new RegExp(address, 'i');
+    if (neighborhood) filter.address = new RegExp(neighborhood, 'i');
     if (propertyType) filter.propertyType = propertyType;
     if (listingType) filter.listingType = listingType;
     if (minPrice || maxPrice) {
@@ -45,14 +50,21 @@ export class PropertiesService {
       if (minPrice) filter.price.$gte = Number(minPrice);
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
-    if (bedrooms) filter.bedrooms = Number(bedrooms);
-    if (bathrooms) filter.bathrooms = Number(bathrooms);
+    if (bedrooms) filter.bedrooms = { $gte: Number(bedrooms) };
+    if (bathrooms) filter.bathrooms = { $gte: Number(bathrooms) };
+
+    let sortOption: any = { createdAt: -1 }; // default: newest first
+    
+    if (sort === 'price-asc') sortOption = { price: 1 };
+    else if (sort === 'price-desc') sortOption = { price: -1 };
+    else if (sort === 'date-asc') sortOption = { createdAt: 1 };
+    else if (sort === 'date-desc') sortOption = { createdAt: -1 };
 
     const [properties, total] = await Promise.all([
       this.propertyModel
         .find(filter)
         .populate('owner', 'firstName lastName email phone')
-        .sort({ createdAt: -1 })
+        .sort(sortOption)
         .limit(Number(limit))
         .skip(Number(offset))
         .exec(),

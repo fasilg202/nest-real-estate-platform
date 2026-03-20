@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -23,7 +24,13 @@ const Navbar: React.FC = () => {
     logout();
     navigate('/');
     setIsMenuOpen(false);
+    setIsUserMenuOpen(false);
   };
+
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -32,7 +39,6 @@ const Navbar: React.FC = () => {
   const navLinks = [
     { path: '/properties?listingType=SALE', label: 'Buy' },
     { path: '/properties?listingType=RENT', label: 'Rent' },
-    { path: '/properties', label: 'Sell' },
   ];
 
   return (
@@ -89,38 +95,52 @@ const Navbar: React.FC = () => {
                   <span>List Property</span>
                 </Link>
 
-                <div className="relative group">
-                  <button className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-neutral-100 transition-colors">
+                <div className="relative">
+                  <button 
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    onBlur={(e) => {
+                      // Close menu when focus leaves the dropdown area
+                      if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) {
+                        setTimeout(() => setIsUserMenuOpen(false), 150);
+                      }
+                    }}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-neutral-100 transition-colors"
+                    aria-expanded={isUserMenuOpen}
+                    aria-haspopup="true"
+                  >
                     <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
                       <span className="text-primary-600 text-sm font-semibold">
-                        {user.firstName?.charAt(0).toUpperCase() || 'U'}
+                        {(user.firstName && user.firstName.trim()) ? user.firstName.charAt(0).toUpperCase() : 'U'}
                       </span>
                     </div>
                   </button>
 
                   {/* Dropdown */}
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-neutral-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <div className="p-4 border-b border-neutral-200">
-                      <p className="font-semibold text-neutral-900">{user.firstName} {user.lastName}</p>
-                      <p className="text-sm text-neutral-600">{user.email}</p>
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-neutral-200 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="p-4 border-b border-neutral-200">
+                        <p className="font-semibold text-neutral-900">{user.firstName} {user.lastName}</p>
+                        <p className="text-sm text-neutral-600">{user.email}</p>
+                      </div>
+                      <div className="py-2">
+                        <Link
+                          to="/dashboard"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center space-x-3 px-4 py-2 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                        >
+                          <User className="h-4 w-4" />
+                          <span className="text-sm">Dashboard</span>
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center space-x-3 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors w-full text-left"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          <span className="text-sm">Sign Out</span>
+                        </button>
+                      </div>
                     </div>
-                    <div className="py-2">
-                      <Link
-                        to="/dashboard"
-                        className="flex items-center space-x-3 px-4 py-2 text-neutral-700 hover:bg-neutral-50 transition-colors"
-                      >
-                        <User className="h-4 w-4" />
-                        <span className="text-sm">Dashboard</span>
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center space-x-3 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors w-full text-left"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        <span className="text-sm">Sign Out</span>
-                      </button>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             ) : (

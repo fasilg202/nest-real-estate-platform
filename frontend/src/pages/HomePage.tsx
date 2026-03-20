@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Search, MapPin, Home as HomeIcon, Bed, Bath, Square, Heart } from 'lucide-react';
+import { Search, MapPin, Home as HomeIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import PropertyCard from '../components/PropertyCard';
 
 const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState<'SALE' | 'RENT'>('SALE');
+  const [favorites, setFavorites] = useState<number[]>([]);
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -14,6 +16,15 @@ const HomePage: React.FC = () => {
       ...(searchQuery && { city: searchQuery }),
     });
     navigate(`/properties?${params.toString()}`);
+  };
+
+  const handleFavoriteToggle = (id: number) => {
+    setFavorites(prev => 
+      prev.includes(id) 
+        ? prev.filter(favId => favId !== id)
+        : [...prev, id]
+    );
+    // TODO: Wire to backend POST/DELETE /api/favorites/:id when user is authenticated
   };
 
   const featuredProperties = [
@@ -59,17 +70,7 @@ const HomePage: React.FC = () => {
     },
   ];
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-    }).format(price);
-  };
 
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('en-US').format(num);
-  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -163,57 +164,19 @@ const HomePage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredProperties.map((property) => (
-              <div
+              <PropertyCard
                 key={property.id}
-                onClick={() => navigate(`/properties/${property.id}`)}
-                className="group cursor-pointer"
-              >
-                <div className="bg-white rounded-lg overflow-hidden shadow-card hover:shadow-card-hover transition-shadow">
-                  {/* Property Image */}
-                  <div className="relative">
-                    <img
-                      src={property.image}
-                      alt={property.address}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                      className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-neutral-50 transition-colors"
-                    >
-                      <Heart className="h-5 w-5 text-neutral-600" />
-                    </button>
-                  </div>
-
-                  {/* Property Details */}
-                  <div className="p-4">
-                    <p className="text-2xl font-bold text-neutral-900 mb-1">
-                      {formatPrice(property.price)}
-                    </p>
-                    <div className="flex items-center gap-3 text-sm text-neutral-600 mb-2">
-                      <span className="flex items-center gap-1">
-                        <Bed className="h-4 w-4" />
-                        {property.beds} bd
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Bath className="h-4 w-4" />
-                        {property.baths} ba
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Square className="h-4 w-4" />
-                        {formatNumber(property.sqft)} sqft
-                      </span>
-                    </div>
-                    <p className="text-sm text-neutral-600">
-                      {property.address}
-                    </p>
-                    <p className="text-sm text-neutral-500">
-                      {property.city}
-                    </p>
-                  </div>
-                </div>
-              </div>
+                id={property.id}
+                price={property.price}
+                address={property.address}
+                city={property.city}
+                beds={property.beds}
+                baths={property.baths}
+                sqft={property.sqft}
+                image={property.image}
+                isFavorite={favorites.includes(property.id)}
+                onFavoriteToggle={handleFavoriteToggle}
+              />
             ))}
           </div>
 

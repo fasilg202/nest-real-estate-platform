@@ -1,26 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Search, 
-  Filter, 
-  MapPin, 
-  Bed, 
-  Bath, 
-  Square, 
-  Heart, 
-  Grid, 
-  List, 
-  SlidersHorizontal,
-  ArrowUpDown,
-  DollarSign
-} from 'lucide-react';
+import { Filter, SlidersHorizontal } from 'lucide-react';
 import axios from 'axios';
+import PropertyCard from '../components/PropertyCard';
 
 interface Property {
   _id: string;
   title: string;
-  description: string;
   price: number;
   address: string;
   city: string;
@@ -30,84 +16,46 @@ interface Property {
   bedrooms?: number;
   bathrooms?: number;
   squareFeet?: number;
-  images: Array<{ url: string; caption?: string }>;
-  features: string[];
+  monthlyRent?: number;
+  images: Array<{ url: string; }>;
   status: string;
-  createdAt: string;
 }
 
 const PropertyListPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [total, setTotal] = useState(0);
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
-  const navigate = useNavigate();
 
-  const LIMIT = 20;
-
+  // Filter states
   const [filters, setFilters] = useState({
+    listingType: searchParams.get('listingType') || 'SALE',
     city: searchParams.get('city') || '',
-    listingType: searchParams.get('listingType') || '',
-    propertyType: '',
-    minPrice: '',
-    maxPrice: '',
-    bedrooms: '',
-    bathrooms: '',
-    sortBy: 'newest'
+    minPrice: searchParams.get('minPrice') || '',
+    maxPrice: searchParams.get('maxPrice') || '',
+    bedrooms: searchParams.get('bedrooms') || '',
+    bathrooms: searchParams.get('bathrooms') || '',
+    propertyType: searchParams.get('propertyType') || '',
   });
 
   useEffect(() => {
     fetchProperties();
   }, [searchParams]);
 
-  const fetchProperties = async (append = false) => {
-    if (append) {
-      setLoadingMore(true);
-    } else {
-      setLoading(true);
-      setOffset(0);
-    }
-
+  const fetchProperties = async () => {
     try {
-      const params = new URLSearchParams();
-      
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value && key !== 'sortBy') params.append(key, value);
-      });
-
-      params.append('limit', LIMIT.toString());
-      params.append('offset', (append ? offset : 0).toString());
-
-      const response = await axios.get(`/properties?${params.toString()}`);
-      const { properties: newProperties, total: newTotal, hasMore: newHasMore } = response.data;
-
-      if (append) {
-        setProperties(prev => [...prev, ...newProperties]);
-        setOffset(prev => prev + newProperties.length);
-      } else {
-        setProperties(newProperties);
-        setOffset(newProperties.length);
-      }
-
-      setTotal(newTotal);
-      setHasMore(newHasMore);
+      setLoading(true);
+      const params = Object.fromEntries(searchParams.entries());
+      const response = await axios.get('/properties', { params });
+      setProperties(response.data.properties || response.data);
+      setTotal(response.data.total || response.data.length);
     } catch (error) {
       console.error('Failed to fetch properties:', error);
+      setProperties([]);
     } finally {
       setLoading(false);
-      setLoadingMore(false);
-    }
-  };
-
-  const loadMore = () => {
-    if (!loadingMore && hasMore) {
-      fetchProperties(true);
     }
   };
 
@@ -118,431 +66,244 @@ const PropertyListPage: React.FC = () => {
   const applyFilters = () => {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
-      if (value && key !== 'sortBy') params.append(key, value);
+      if (value) params.set(key, value);
     });
     setSearchParams(params);
     setShowFilters(false);
   };
 
   const clearFilters = () => {
-    setFilters({
+    const resetFilters = {
+      listingType: 'SALE',
       city: '',
-      listingType: '',
-      propertyType: '',
       minPrice: '',
       maxPrice: '',
       bedrooms: '',
       bathrooms: '',
-      sortBy: 'newest'
-    });
-    setSearchParams(new URLSearchParams());
-  };
-
-  const toggleFavorite = (propertyId: string) => {
-    setFavorites(prev => 
-      prev.includes(propertyId) 
-        ? prev.filter(id => id !== propertyId)
-        : [...prev, propertyId]
-    );
-  };
-
-  const formatPrice = (price: number, listingType: string) => {
-    const formatted = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-    }).format(price);
-    
-    return listingType === 'RENT' ? `${formatted}/month` : formatted;
-  };
-
-  const getPropertyTypeLabel = (type: string) => {
-    const types: { [key: string]: string } = {
-      'HOUSE': 'House',
-      'APARTMENT': 'Apartment',
-      'CONDO': 'Condo',
-      'TOWNHOUSE': 'Townhouse',
-      'LOFT': 'Loft',
-      'STUDIO': 'Studio',
-      'DUPLEX': 'Duplex',
-      'MOBILE_HOME': 'Mobile Home',
-      'LAND': 'Land',
-      'COMMERCIAL': 'Commercial'
+      propertyType: '',
     };
-    return types[type] || type;
+    setFilters(resetFilters);
+    setSearchParams({});
   };
 
-  const PropertyCard: React.FC<{ property: Property; isListView?: boolean }> = ({ property, isListView = false }) => {
-    const isFavorite = favorites.includes(property._id);
-    
-    if (isListView) {
-      return (
-        <div className="card hover:shadow-neon transition-all duration-300">
-          <div className="flex flex-col lg:flex-row">
-            <div className="lg:w-80 h-64 lg:h-auto relative">
-              <img
-                src={property.images[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop'}
-                alt={property.title}
-                className="w-full h-full object-cover rounded-t-xl lg:rounded-l-xl lg:rounded-t-none"
-              />
-              <button
-                onClick={() => toggleFavorite(property._id)}
-                className={`absolute top-4 right-4 p-2 rounded-full transition-all duration-200 ${
-                  isFavorite ? 'bg-accent text-dark-bg' : 'bg-dark-surface text-gray-400 hover:text-accent'
-                }`}
-              >
-                <Heart className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`} />
-              </button>
-              <div className="absolute top-4 left-4">
-                <span className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                  property.listingType === 'SALE' 
-                    ? 'bg-accent text-dark-bg' 
-                    : 'bg-dark-surface text-accent border border-accent'
-                }`}>
-                  {property.listingType === 'SALE' ? 'For Sale' : 'For Rent'}
-                </span>
-              </div>
-            </div>
-            <div className="flex-1 p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-100 mb-2 line-clamp-2">{property.title}</h3>
-                  <div className="flex items-center text-gray-400 mb-2">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span className="text-sm">{property.address}, {property.city}, {property.state}</span>
-                  </div>
-                  <span className="px-3 py-1 rounded-lg text-sm font-medium bg-dark-surface-light text-gray-300">
-                    {getPropertyTypeLabel(property.propertyType)}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-accent mb-1">
-                    {formatPrice(property.price, property.listingType)}
-                  </div>
-                </div>
-              </div>
-              
-              <p className="text-gray-400 mb-4 line-clamp-2">{property.description}</p>
-              
-              <div className="flex items-center gap-6 text-gray-400 mb-4">
-                {property.bedrooms !== undefined && (
-                  <div className="flex items-center gap-1">
-                    <Bed className="h-4 w-4" />
-                    <span className="text-sm">{property.bedrooms} beds</span>
-                  </div>
-                )}
-                {property.bathrooms !== undefined && (
-                  <div className="flex items-center gap-1">
-                    <Bath className="h-4 w-4" />
-                    <span className="text-sm">{property.bathrooms} baths</span>
-                  </div>
-                )}
-                {property.squareFeet && (
-                  <div className="flex items-center gap-1">
-                    <Square className="h-4 w-4" />
-                    <span className="text-sm">{property.squareFeet.toLocaleString()} sqft</span>
-                  </div>
-                )}
-              </div>
-              
-              <button
-                onClick={() => navigate(`/properties/${property._id}`)}
-                className="btn-primary"
-              >
-                View Details
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
+  const handleFavoriteToggle = (id: string) => {
+    setFavorites(prev =>
+      prev.includes(id)
+        ? prev.filter(favId => favId !== id)
+        : [...prev, id]
+    );
+    // TODO: Wire to backend POST/DELETE /api/favorites/:id
+  };
 
-    return (
-      <div className="card group cursor-pointer hover:shadow-neon transition-all duration-300" 
-           onClick={() => navigate(`/properties/${property._id}`)}>
-        <div className="relative">
-          <img
-            src={property.images[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop'}
-            alt={property.title}
-            className="w-full h-64 object-cover rounded-t-xl"
-          />
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleFavorite(property._id);
-            }}
-                          className={`absolute top-4 right-4 p-2 rounded-full transition-all duration-200 ${
-                isFavorite ? 'bg-accent text-dark-bg' : 'bg-dark-surface text-gray-400 hover:text-accent'
-              }`}
-          >
-            <Heart className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`} />
-          </button>
-          <div className="absolute top-4 left-4">
-            <span className={`px-3 py-1 rounded-lg text-sm font-medium ${
-              property.listingType === 'SALE' 
-                ? 'bg-accent text-dark-bg' 
-                : 'bg-dark-surface text-accent border border-accent'
-            }`}>
-              {property.listingType === 'SALE' ? 'For Sale' : 'For Rent'}
-            </span>
-          </div>
-        </div>
-        
-        <div className="p-6">
-          <div className="text-2xl font-bold text-accent mb-2">
-            {formatPrice(property.price, property.listingType)}
-          </div>
-          <h3 className="text-lg font-bold text-gray-100 mb-2 line-clamp-1">{property.title}</h3>
-          <div className="flex items-center text-gray-400 mb-4">
-            <MapPin className="h-4 w-4 mr-1" />
-            <span className="text-sm line-clamp-1">{property.address}, {property.city}, {property.state}</span>
-          </div>
+  const activeFiltersCount = Object.values(filters).filter(v => v && v !== 'SALE').length;
+
+  return (
+    <div className="min-h-screen bg-neutral-50 pt-16">
+      {/* Header */}
+      <div className="bg-white border-b border-neutral-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <span className="px-3 py-1 rounded-lg text-sm font-medium bg-dark-surface-light text-gray-300">
-              {getPropertyTypeLabel(property.propertyType)}
-            </span>
-            <div className="flex items-center gap-4 text-gray-400">
-              {property.bedrooms !== undefined && (
-                <div className="flex items-center gap-1">
-                  <Bed className="h-4 w-4" />
-                  <span>{property.bedrooms}</span>
-                </div>
-              )}
-              {property.bathrooms !== undefined && (
-                <div className="flex items-center gap-1">
-                  <Bath className="h-4 w-4" />
-                  <span>{property.bathrooms}</span>
-                </div>
-              )}
-              {property.squareFeet && (
-                <div className="flex items-center gap-1">
-                  <Square className="h-4 w-4" />
-                  <span>{property.squareFeet.toLocaleString()}</span>
-                </div>
-              )}
+            <div>
+              <h1 className="text-3xl font-bold text-neutral-900 mb-2">
+                {filters.city ? `Homes in ${filters.city}` : 'All Properties'}
+              </h1>
+              <p className="text-neutral-600">
+                {total} {total === 1 ? 'result' : 'results'}
+              </p>
             </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-4 py-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
+            >
+              <SlidersHorizontal className="h-5 w-5" />
+              <span>Filters</span>
+              {activeFiltersCount > 0 && (
+                <span className="px-2 py-0.5 bg-primary-600 text-white text-xs rounded-full">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </div>
-    );
-  };
 
-  return (
-              <div className="min-h-screen pt-20" style={{backgroundColor: '#0A0A0F'}}>
-      <div className="container py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-100 mb-2">
-            Properties {filters.listingType && `for ${filters.listingType === 'SALE' ? 'Sale' : 'Rent'}`}
-            {filters.city && ` in ${filters.city}`}
-          </h1>
-          <p className="text-gray-400">
-            {loading ? 'Searching...' : `${properties.length} properties found`}
-          </p>
-        </div>
+      {/* Filters Panel */}
+      {showFilters && (
+        <div className="bg-white border-b border-neutral-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              {/* Listing Type */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Listing Type
+                </label>
+                <select
+                  value={filters.listingType}
+                  onChange={(e) => handleFilterChange('listingType', e.target.value)}
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="SALE">For Sale</option>
+                  <option value="RENT">For Rent</option>
+                </select>
+              </div>
 
-        {/* Search and Filters Bar */}
-        <div className="card p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4 items-center">
-            {/* Search Input */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <input
-                type="text"
-                placeholder="Search by city, neighborhood, or address"
-                value={filters.city}
-                onChange={(e) => handleFilterChange('city', e.target.value)}
-                className="input-field pl-12"
-              />
+              {/* City */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  City
+                </label>
+                <input
+                  type="text"
+                  value={filters.city}
+                  onChange={(e) => handleFilterChange('city', e.target.value)}
+                  placeholder="Enter city"
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              {/* Min Price */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Min Price
+                </label>
+                <input
+                  type="number"
+                  value={filters.minPrice}
+                  onChange={(e) => handleFilterChange('minPrice', e.target.value)}
+                  placeholder="No min"
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              {/* Max Price */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Max Price
+                </label>
+                <input
+                  type="number"
+                  value={filters.maxPrice}
+                  onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
+                  placeholder="No max"
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              {/* Bedrooms */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Bedrooms
+                </label>
+                <select
+                  value={filters.bedrooms}
+                  onChange={(e) => handleFilterChange('bedrooms', e.target.value)}
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="">Any</option>
+                  <option value="1">1+</option>
+                  <option value="2">2+</option>
+                  <option value="3">3+</option>
+                  <option value="4">4+</option>
+                  <option value="5">5+</option>
+                </select>
+              </div>
+
+              {/* Bathrooms */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Bathrooms
+                </label>
+                <select
+                  value={filters.bathrooms}
+                  onChange={(e) => handleFilterChange('bathrooms', e.target.value)}
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="">Any</option>
+                  <option value="1">1+</option>
+                  <option value="2">2+</option>
+                  <option value="3">3+</option>
+                  <option value="4">4+</option>
+                </select>
+              </div>
+
+              {/* Property Type */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Property Type
+                </label>
+                <select
+                  value={filters.propertyType}
+                  onChange={(e) => handleFilterChange('propertyType', e.target.value)}
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="">All Types</option>
+                  <option value="HOUSE">House</option>
+                  <option value="APARTMENT">Apartment</option>
+                  <option value="CONDO">Condo</option>
+                  <option value="TOWNHOUSE">Townhouse</option>
+                </select>
+              </div>
             </div>
 
-            {/* Quick Filters */}
-            <div className="flex items-center gap-3">
-              <select
-                value={filters.listingType}
-                onChange={(e) => handleFilterChange('listingType', e.target.value)}
-                className="input-field w-auto"
-              >
-                <option value="">All Types</option>
-                <option value="SALE">For Sale</option>
-                <option value="RENT">For Rent</option>
-              </select>
-
-              <select
-                value={filters.sortBy}
-                onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                className="input-field w-auto"
-              >
-                <option value="newest">Newest First</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-              </select>
-
+            <div className="flex gap-4">
               <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`btn-secondary flex items-center gap-2 ${showFilters ? 'bg-accent/10 border-accent text-accent' : ''}`}
+                onClick={applyFilters}
+                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
               >
-                <SlidersHorizontal className="h-4 w-4" />
-                Filters
+                Apply Filters
               </button>
-
-              <div className="flex items-center gap-2 border-l border-dark-border pl-3">
-                <button
-                  onClick={() => setViewMode('grid')}
-                                      className={`p-2 rounded-lg transition-colors ${
-                      viewMode === 'grid' ? 'bg-accent text-dark-bg' : 'text-gray-400 hover:text-accent'
-                    }`}
-                >
-                  <Grid className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                                      className={`p-2 rounded-lg transition-colors ${
-                      viewMode === 'list' ? 'bg-accent text-dark-bg' : 'text-gray-400 hover:text-accent'
-                    }`}
-                >
-                  <List className="h-5 w-5" />
-                </button>
-              </div>
+              <button
+                onClick={clearFilters}
+                className="px-6 py-2 border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors font-medium"
+              >
+                Clear All
+              </button>
             </div>
           </div>
-
-          {/* Advanced Filters */}
-          {showFilters && (
-            <div className="mt-6 pt-6 border-t border-dark-border animate-slide-down">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Property Type</label>
-                  <select
-                    value={filters.propertyType}
-                    onChange={(e) => handleFilterChange('propertyType', e.target.value)}
-                    className="input-field"
-                  >
-                    <option value="">All Types</option>
-                    <option value="HOUSE">House</option>
-                    <option value="APARTMENT">Apartment</option>
-                    <option value="CONDO">Condo</option>
-                    <option value="TOWNHOUSE">Townhouse</option>
-                    <option value="LOFT">Loft</option>
-                    <option value="STUDIO">Studio</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Min Price</label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <input
-                      type="number"
-                      placeholder="0"
-                      value={filters.minPrice}
-                      onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                      className="input-field pl-10"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Max Price</label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <input
-                      type="number"
-                      placeholder="No limit"
-                      value={filters.maxPrice}
-                      onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                      className="input-field pl-10"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Bedrooms</label>
-                  <select
-                    value={filters.bedrooms}
-                    onChange={(e) => handleFilterChange('bedrooms', e.target.value)}
-                    className="input-field"
-                  >
-                    <option value="">Any</option>
-                    <option value="1">1+</option>
-                    <option value="2">2+</option>
-                    <option value="3">3+</option>
-                    <option value="4">4+</option>
-                    <option value="5">5+</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 mt-6">
-                <button onClick={applyFilters} className="btn-primary">
-                  Apply Filters
-                </button>
-                <button onClick={clearFilters} className="btn-secondary">
-                  Clear All
-                </button>
-              </div>
-            </div>
-          )}
         </div>
+      )}
 
-        {/* Results */}
+      {/* Results */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <p className="text-neutral-600">Loading properties...</p>
           </div>
         ) : properties.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-gray-400 mb-4">
-              <Search className="h-24 w-24 mx-auto" />
-            </div>
-            <h3 className="text-2xl font-semibold text-gray-100 mb-2">No properties found</h3>
-            <p className="text-gray-400 mb-6">Try adjusting your search criteria or filters</p>
-            <button onClick={clearFilters} className="btn-primary">
+          <div className="text-center py-12">
+            <Filter className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
+            <p className="text-xl text-neutral-900 mb-2">No properties found</p>
+            <p className="text-neutral-600 mb-6">Try adjusting your filters or search criteria</p>
+            <button
+              onClick={clearFilters}
+              className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            >
               Clear Filters
             </button>
           </div>
         ) : (
-          <>
-            <div className="mb-4 text-gray-400 text-sm">
-              Showing {properties.length} of {total} properties
-            </div>
-            <div className={
-              viewMode === 'grid' 
-                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'
-                : 'space-y-6'
-            }>
-              {properties.map((property) => (
-                <PropertyCard 
-                  key={property._id} 
-                  property={property} 
-                  isListView={viewMode === 'list'} 
-                />
-              ))}
-            </div>
-            
-            {hasMore && (
-              <div className="mt-12 text-center">
-                <button
-                  onClick={loadMore}
-                  disabled={loadingMore}
-                  className="btn-primary btn-lg px-8"
-                >
-                  {loadingMore ? (
-                    <span className="flex items-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Loading...
-                    </span>
-                  ) : (
-                    `Load More (${total - properties.length} remaining)`
-                  )}
-                </button>
-              </div>
-            )}
-          </>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {properties.map((property) => (
+              <PropertyCard
+                key={property._id}
+                id={parseInt(property._id)}
+                price={property.listingType === 'RENT' ? property.monthlyRent || property.price : property.price}
+                address={property.address}
+                city={`${property.city}, ${property.state}`}
+                beds={property.bedrooms || 0}
+                baths={property.bathrooms || 0}
+                sqft={property.squareFeet || 0}
+                image={property.images && property.images.length > 0 ? property.images[0].url : 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600&h=400&fit=crop'}
+                isFavorite={favorites.includes(property._id)}
+                onFavoriteToggle={() => handleFavoriteToggle(property._id)}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>
   );
 };
 
-export default PropertyListPage; 
+export default PropertyListPage;

@@ -5,23 +5,13 @@ import {
   Bed, 
   Bath, 
   Square, 
-  Car, 
   Heart, 
   Share2, 
-  Phone, 
-  Mail, 
-  Calendar,
-  Eye,
-  ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  Star,
-  Check,
-  Home,
-  Wifi,
-  Zap,
-  Shield,
-  X
+  ArrowLeft,
+  Home as HomeIcon,
+  Calendar
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -40,17 +30,11 @@ interface Property {
   bedrooms?: number;
   bathrooms?: number;
   squareFeet?: number;
-  lotSize?: number;
   yearBuilt?: number;
-  parkingSpots?: number;
   monthlyRent?: number;
   securityDeposit?: number;
   leaseTermMonths?: number;
-  petsAllowed?: boolean;
-  utilitiesIncluded?: boolean;
-  images: Array<{ url: string; caption?: string }>;
-  features: string[];
-  amenities: string[];
+  images: Array<{ url: string; }>;
   status: string;
   owner: {
     _id: string;
@@ -72,11 +56,10 @@ const PropertyDetailPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [showContactForm, setShowContactForm] = useState(false);
   const [contactForm, setContactForm] = useState({
-    name: user?.firstName + ' ' + user?.lastName || '',
+    name: user ? `${user.firstName} ${user.lastName}` : '',
     email: user?.email || '',
-    phone: user?.phone || '',
+    phone: '',
     message: ''
   });
 
@@ -101,78 +84,40 @@ const PropertyDetailPage: React.FC = () => {
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    try {
-      await axios.post('/contacts', {
-        propertyId: property?._id,
-        name: contactForm.name,
-        email: contactForm.email,
-        phone: contactForm.phone,
-        message: contactForm.message
-      });
-      
-      alert('Message sent successfully! The property owner will contact you soon.');
-      setShowContactForm(false);
-      setContactForm({
-        name: user?.firstName + ' ' + user?.lastName || '',
-        email: user?.email || '',
-        phone: user?.phone || '',
-        message: ''
-      });
-    } catch (error) {
-      console.error('Failed to send message:', error);
-      alert('Failed to send message. Please try again.');
-    }
+    // TODO: Wire to backend POST /api/contacts
+    alert('Contact form submitted! (Backend integration pending)');
   };
 
-  const formatPrice = (price: number, listingType: string) => {
-    const formatted = new Intl.NumberFormat('en-US', {
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
     }).format(price);
-    
-    return listingType === 'RENT' ? `${formatted}/month` : formatted;
   };
 
-  const getPropertyTypeLabel = (type: string) => {
-    const types: { [key: string]: string } = {
-      'HOUSE': 'House',
-      'APARTMENT': 'Apartment',
-      'CONDO': 'Condo',
-      'TOWNHOUSE': 'Townhouse',
-      'LOFT': 'Loft',
-      'STUDIO': 'Studio',
-      'DUPLEX': 'Duplex',
-      'MOBILE_HOME': 'Mobile Home',
-      'LAND': 'Land',
-      'COMMERCIAL': 'Commercial'
-    };
-    return types[type] || type;
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat('en-US').format(num);
   };
 
   const nextImage = () => {
     if (property && property.images.length > 0) {
-      setCurrentImageIndex((prev) => 
-        prev === property.images.length - 1 ? 0 : prev + 1
-      );
+      setCurrentImageIndex((prev) => (prev + 1) % property.images.length);
     }
   };
 
   const prevImage = () => {
     if (property && property.images.length > 0) {
-      setCurrentImageIndex((prev) => 
-        prev === 0 ? property.images.length - 1 : prev - 1
-      );
+      setCurrentImageIndex((prev) => (prev - 1 + property.images.length) % property.images.length);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-20">
+      <div className="min-h-screen bg-neutral-50 pt-24 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading property details...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-neutral-600">Loading property...</p>
         </div>
       </div>
     );
@@ -180,448 +125,263 @@ const PropertyDetailPage: React.FC = () => {
 
   if (error || !property) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-20">
+      <div className="min-h-screen bg-neutral-50 pt-24 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-gray-400 mb-4">
-            <Home className="h-24 w-24 mx-auto" />
-          </div>
-          <h3 className="text-2xl font-semibold text-gray-900 mb-2">Property Not Found</h3>
-          <p className="text-gray-600 mb-6">The property you're looking for doesn't exist or has been removed.</p>
-          <button 
-            onClick={() => navigate('/properties')} 
-            className="btn-primary"
+          <p className="text-xl text-neutral-900 mb-4">{error || 'Property not found'}</p>
+          <button
+            onClick={() => navigate('/properties')}
+            className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
           >
-            Browse Properties
+            Back to Listings
           </button>
         </div>
       </div>
     );
   }
 
-  const defaultImage = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop';
-  const images = property.images.length > 0 ? property.images : [{ url: defaultImage }];
+  const displayImages = property.images && property.images.length > 0 
+    ? property.images 
+    : [{ url: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&h=600&fit=crop' }];
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-white pt-16">
       {/* Back Button */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          <span>Back to listings</span>
-        </button>
+      <div className="bg-white border-b border-neutral-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center text-neutral-600 hover:text-neutral-900 transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Back to search
+          </button>
+        </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      {/* Image Gallery */}
+      <div className="relative bg-neutral-900 h-[500px]">
+        <img
+          src={displayImages[currentImageIndex].url}
+          alt={property.title}
+          className="w-full h-full object-cover"
+        />
+        
+        {displayImages.length > 1 && (
+          <>
+            <button
+              onClick={prevImage}
+              className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white/90 rounded-full hover:bg-white transition-colors"
+            >
+              <ChevronLeft className="h-6 w-6 text-neutral-900" />
+            </button>
+            <button
+              onClick={nextImage}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white/90 rounded-full hover:bg-white transition-colors"
+            >
+              <ChevronRight className="h-6 w-6 text-neutral-900" />
+            </button>
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm">
+              {currentImageIndex + 1} / {displayImages.length}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Image Gallery */}
-            <div className="relative">
-              <div className="relative h-96 lg:h-[500px] rounded-3xl overflow-hidden bg-gray-200">
-                <img
-                  src={images[currentImageIndex]?.url}
-                  alt={property.title}
-                  className="w-full h-full object-cover"
-                />
-                
-                {/* Image Navigation */}
-                {images.length > 1 && (
-                  <>
-                    <button
-                      onClick={prevImage}
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 bg-white/80 hover:bg-white rounded-full shadow-lg transition-all"
-                    >
-                      <ChevronLeft className="h-6 w-6 text-gray-700" />
-                    </button>
-                    <button
-                      onClick={nextImage}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 bg-white/80 hover:bg-white rounded-full shadow-lg transition-all"
-                    >
-                      <ChevronRight className="h-6 w-6 text-gray-700" />
-                    </button>
-                  </>
-                )}
-
-                {/* Image Counter */}
-                <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                  {currentImageIndex + 1} / {images.length}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="absolute top-4 right-4 flex space-x-2">
-                  <button
-                    onClick={() => setIsFavorite(!isFavorite)}
-                    className={`p-3 rounded-full transition-all ${
-                      isFavorite ? 'bg-red-500 text-white' : 'bg-white/80 text-gray-700 hover:bg-white'
-                    }`}
-                  >
-                    <Heart className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`} />
-                  </button>
-                  <button className="p-3 bg-white/80 hover:bg-white text-gray-700 rounded-full transition-all">
-                    <Share2 className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Thumbnail Gallery */}
-              {images.length > 1 && (
-                <div className="flex space-x-2 mt-4 overflow-x-auto pb-2">
-                  {images.map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentImageIndex(index)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
-                        index === currentImageIndex 
-                          ? 'border-accent-600' 
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <img
-                        src={image.url}
-                        alt={`View ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Property Details */}
-            <div className="bg-white rounded-3xl shadow-lg border border-gray-200 p-8">
-              <div className="flex items-start justify-between mb-6">
+          <div className="lg:col-span-2">
+            {/* Title and Price */}
+            <div className="mb-6">
+              <div className="flex items-start justify-between mb-4">
                 <div>
-                  <div className="flex items-center space-x-3 mb-2">
-                    <span className="badge-primary">
-                      {property.listingType === 'SALE' ? 'For Sale' : 'For Rent'}
-                    </span>
-                    <span className="badge-secondary">
-                      {getPropertyTypeLabel(property.propertyType)}
-                    </span>
-                  </div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{property.title}</h1>
-                  <div className="flex items-center text-gray-600">
+                  <h1 className="text-4xl font-bold text-neutral-900 mb-2">
+                    {formatPrice(property.listingType === 'RENT' ? property.monthlyRent || property.price : property.price)}
+                    {property.listingType === 'RENT' && <span className="text-2xl text-neutral-600">/mo</span>}
+                  </h1>
+                  <div className="flex items-center text-neutral-600 mb-2">
                     <MapPin className="h-5 w-5 mr-2" />
                     <span>{property.address}, {property.city}, {property.state} {property.zipCode}</span>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-4xl font-bold text-accent-600 mb-1">
-                    {formatPrice(property.price, property.listingType)}
-                  </div>
-                  {property.listingType === 'RENT' && property.securityDeposit && (
-                    <div className="text-sm text-gray-600">
-                      Security Deposit: ${property.securityDeposit.toLocaleString()}
-                    </div>
-                  )}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setIsFavorite(!isFavorite)}
+                    className="p-3 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
+                  >
+                    <Heart className={`h-5 w-5 ${isFavorite ? 'text-red-500 fill-current' : 'text-neutral-600'}`} />
+                  </button>
+                  <button className="p-3 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors">
+                    <Share2 className="h-5 w-5 text-neutral-600" />
+                  </button>
                 </div>
               </div>
 
               {/* Property Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-6 border-y border-gray-200">
-                {property.bedrooms !== undefined && (
-                  <div className="text-center">
-                    <Bed className="h-8 w-8 text-accent-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{property.bedrooms}</div>
-                    <div className="text-sm text-gray-600">Bedrooms</div>
+              <div className="flex items-center gap-6 text-lg text-neutral-700">
+                {property.bedrooms && (
+                  <div className="flex items-center gap-2">
+                    <Bed className="h-5 w-5" />
+                    <span>{property.bedrooms} bd</span>
                   </div>
                 )}
-                {property.bathrooms !== undefined && (
-                  <div className="text-center">
-                    <Bath className="h-8 w-8 text-accent-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{property.bathrooms}</div>
-                    <div className="text-sm text-gray-600">Bathrooms</div>
+                {property.bathrooms && (
+                  <div className="flex items-center gap-2">
+                    <Bath className="h-5 w-5" />
+                    <span>{property.bathrooms} ba</span>
                   </div>
                 )}
                 {property.squareFeet && (
-                  <div className="text-center">
-                    <Square className="h-8 w-8 text-accent-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{property.squareFeet.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600">Sq Ft</div>
+                  <div className="flex items-center gap-2">
+                    <Square className="h-5 w-5" />
+                    <span>{formatNumber(property.squareFeet)} sqft</span>
                   </div>
                 )}
-                {property.parkingSpots !== undefined && property.parkingSpots > 0 && (
-                  <div className="text-center">
-                    <Car className="h-8 w-8 text-accent-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{property.parkingSpots}</div>
-                    <div className="text-sm text-gray-600">Parking</div>
-                  </div>
-                )}
-              </div>
-
-              {/* Description */}
-              <div className="mt-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Description</h3>
-                <p className="text-gray-700 leading-relaxed">{property.description}</p>
-              </div>
-
-              {/* Additional Details */}
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-3">Property Details</h4>
-                  <div className="space-y-2 text-sm">
-                    {property.yearBuilt && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Year Built:</span>
-                        <span className="font-medium">{property.yearBuilt}</span>
-                      </div>
-                    )}
-                    {property.lotSize && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Lot Size:</span>
-                        <span className="font-medium">{property.lotSize.toLocaleString()} sq ft</span>
-                      </div>
-                    )}
-                    {property.listingType === 'RENT' && (
-                      <>
-                        {property.leaseTermMonths && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Lease Term:</span>
-                            <span className="font-medium">{property.leaseTermMonths} months</span>
-                          </div>
-                        )}
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Pets Allowed:</span>
-                          <span className="font-medium">{property.petsAllowed ? 'Yes' : 'No'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Utilities Included:</span>
-                          <span className="font-medium">{property.utilitiesIncluded ? 'Yes' : 'No'}</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-3">Listing Details</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Listed:</span>
-                      <span className="font-medium">
-                        {new Date(property.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Status:</span>
-                      <span className="font-medium">{property.status}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Property ID:</span>
-                      <span className="font-medium">#{property._id.slice(-6).toUpperCase()}</span>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <HomeIcon className="h-5 w-5" />
+                  <span>{property.propertyType}</span>
                 </div>
               </div>
             </div>
 
-            {/* Features & Amenities */}
-            {(property.features.length > 0 || property.amenities.length > 0) && (
-              <div className="bg-white rounded-3xl shadow-lg border border-gray-200 p-8">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Features & Amenities</h3>
-                
-                {property.features.length > 0 && (
-                  <div className="mb-6">
-                    <h4 className="font-medium text-gray-900 mb-3">Property Features</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      {property.features.map((feature, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                          <Check className="h-4 w-4 text-success-600 flex-shrink-0" />
-                          <span className="text-gray-700">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
+            {/* Description */}
+            <div className="border-t border-neutral-200 pt-6 mb-6">
+              <h2 className="text-2xl font-bold text-neutral-900 mb-4">Overview</h2>
+              <p className="text-neutral-700 leading-relaxed whitespace-pre-line">
+                {property.description || 'No description available.'}
+              </p>
+            </div>
+
+            {/* Property Details */}
+            <div className="border-t border-neutral-200 pt-6 mb-6">
+              <h2 className="text-2xl font-bold text-neutral-900 mb-4">Property Details</h2>
+              <div className="grid grid-cols-2 gap-4">
+                {property.propertyType && (
+                  <div>
+                    <p className="text-neutral-600 text-sm">Property Type</p>
+                    <p className="text-neutral-900 font-medium">{property.propertyType}</p>
                   </div>
                 )}
-
-                {property.amenities.length > 0 && (
+                {property.yearBuilt && (
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-3">Amenities</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      {property.amenities.map((amenity, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                          <Check className="h-4 w-4 text-success-600 flex-shrink-0" />
-                          <span className="text-gray-700">{amenity}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <p className="text-neutral-600 text-sm">Year Built</p>
+                    <p className="text-neutral-900 font-medium">{property.yearBuilt}</p>
+                  </div>
+                )}
+                {property.listingType && (
+                  <div>
+                    <p className="text-neutral-600 text-sm">Listing Type</p>
+                    <p className="text-neutral-900 font-medium">{property.listingType === 'SALE' ? 'For Sale' : 'For Rent'}</p>
+                  </div>
+                )}
+                {property.status && (
+                  <div>
+                    <p className="text-neutral-600 text-sm">Status</p>
+                    <p className="text-neutral-900 font-medium">{property.status}</p>
+                  </div>
+                )}
+                {property.listingType === 'RENT' && property.leaseTermMonths && (
+                  <div>
+                    <p className="text-neutral-600 text-sm">Lease Term</p>
+                    <p className="text-neutral-900 font-medium">{property.leaseTermMonths} months</p>
+                  </div>
+                )}
+                {property.listingType === 'RENT' && property.securityDeposit && (
+                  <div>
+                    <p className="text-neutral-600 text-sm">Security Deposit</p>
+                    <p className="text-neutral-900 font-medium">{formatPrice(property.securityDeposit)}</p>
                   </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Contact Card */}
-            <div className="bg-white rounded-3xl shadow-lg border border-gray-200 p-6 sticky top-24">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{
-                background: 'linear-gradient(to right, #C5FF4B, #A8E640)'
-              }}>
-                  <span className="text-white text-xl font-bold">
-                    {property.owner.firstName.charAt(0)}{property.owner.lastName.charAt(0)}
-                  </span>
-                </div>
-                <h3 className="font-semibold text-gray-900">
-                  {property.owner.firstName} {property.owner.lastName}
-                </h3>
-                <p className="text-gray-600">Property Owner</p>
-              </div>
-
-              <div className="space-y-3">
-                <button
-                  onClick={() => setShowContactForm(true)}
-                  className="w-full btn-primary flex items-center justify-center space-x-2"
-                >
-                  <Mail className="h-5 w-5" />
-                  <span>Contact Owner</span>
-                </button>
+          {/* Sidebar - Contact Form */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-sm">
+                <h3 className="text-xl font-bold text-neutral-900 mb-4">Contact Agent</h3>
                 
-                {property.owner.phone && (
-                  <a
-                    href={`tel:${property.owner.phone}`}
-                    className="w-full btn-outline flex items-center justify-center space-x-2"
+                <form onSubmit={handleContactSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={contactForm.email}
+                      onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Phone
+                    </label>
+                    <input
+                      type="tel"
+                      value={contactForm.phone}
+                      onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Message
+                    </label>
+                    <textarea
+                      value={contactForm.message}
+                      onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                      rows={4}
+                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                      placeholder="I'm interested in this property..."
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
                   >
-                    <Phone className="h-5 w-5" />
-                    <span>Call Now</span>
-                  </a>
+                    Request Information
+                  </button>
+                </form>
+
+                {/* Agent Info */}
+                {property.owner && (
+                  <div className="mt-6 pt-6 border-t border-neutral-200">
+                    <p className="text-sm text-neutral-600 mb-2">Listed by</p>
+                    <p className="font-medium text-neutral-900">
+                      {property.owner.firstName} {property.owner.lastName}
+                    </p>
+                    {property.owner.phone && (
+                      <p className="text-sm text-neutral-600 mt-1">{property.owner.phone}</p>
+                    )}
+                  </div>
                 )}
-
-                <button className="w-full btn-ghost flex items-center justify-center space-x-2">
-                  <Calendar className="h-5 w-5" />
-                  <span>Schedule Tour</span>
-                </button>
-              </div>
-
-              {/* Property Overview */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <h4 className="font-semibold text-gray-900 mb-3">Quick Overview</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Price:</span>
-                    <span className="font-semibold text-accent-600">
-                      {formatPrice(property.price, property.listingType)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Type:</span>
-                    <span className="font-medium">{getPropertyTypeLabel(property.propertyType)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Size:</span>
-                    <span className="font-medium">
-                      {property.squareFeet ? `${property.squareFeet.toLocaleString()} sq ft` : 'N/A'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Safety & Trust */}
-            <div className="bg-white rounded-3xl shadow-lg border border-gray-200 p-6">
-              <div className="flex items-center space-x-3 mb-4">
-                <Shield className="h-6 w-6 text-success-600" />
-                <h3 className="font-semibold text-gray-900">Safety & Trust</h3>
-              </div>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-success-600" />
-                  <span className="text-gray-700">Verified property owner</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-success-600" />
-                  <span className="text-gray-700">Secure messaging</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-success-600" />
-                  <span className="text-gray-700">Protected personal info</span>
-                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Contact Modal */}
-      {showContactForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">Contact Owner</h3>
-              <button
-                onClick={() => setShowContactForm(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            <form onSubmit={handleContactSubmit} className="space-y-4">
-              <div className="form-group">
-                <label className="form-label">Name</label>
-                <input
-                  type="text"
-                  value={contactForm.name}
-                  onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="input"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Email</label>
-                <input
-                  type="email"
-                  value={contactForm.email}
-                  onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
-                  className="input"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Phone</label>
-                <input
-                  type="tel"
-                  value={contactForm.phone}
-                  onChange={(e) => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
-                  className="input"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Message</label>
-                <textarea
-                  value={contactForm.message}
-                  onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
-                  className="input h-24 resize-none"
-                  placeholder="I'm interested in this property..."
-                  required
-                />
-              </div>
-
-              <div className="flex space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setShowContactForm(false)}
-                  className="flex-1 btn-ghost"
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="flex-1 btn-primary">
-                  Send Message
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-export default PropertyDetailPage; 
+export default PropertyDetailPage;

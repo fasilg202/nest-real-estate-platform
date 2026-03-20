@@ -277,7 +277,7 @@ const HomePage: React.FC = () => {
               <div
                 key={property.id}
                 className="property-card cursor-pointer"
-                onClick={() => navigate(`/property/${property.id}`)}
+                onClick={() => navigate(`/properties/${property.id}`)}
               >
                 {/* Property Image */}
                 <div className="relative overflow-hidden h-64">

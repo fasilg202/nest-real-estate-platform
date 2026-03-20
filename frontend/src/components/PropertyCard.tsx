@@ -50,7 +50,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   return (
     <div
       className="property-card cursor-pointer"
-      onClick={() => navigate(`/property/${id}`)}
+      onClick={() => navigate(`/properties/${id}`)}
     >
       {/* Property Image */}
       <div className="relative overflow-hidden h-64">
@@ -105,7 +105,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           className="w-full mt-6 btn-primary"
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/property/${id}`);
+            navigate(`/properties/${id}`);
           }}
         >
           View Details

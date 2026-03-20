@@ -40,10 +40,16 @@ const PropertyListPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [total, setTotal] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const navigate = useNavigate();
+
+  const LIMIT = 20;
 
   const [filters, setFilters] = useState({
     city: searchParams.get('city') || '',
@@ -60,8 +66,14 @@ const PropertyListPage: React.FC = () => {
     fetchProperties();
   }, [searchParams]);
 
-  const fetchProperties = async () => {
-    setLoading(true);
+  const fetchProperties = async (append = false) => {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+      setOffset(0);
+    }
+
     try {
       const params = new URLSearchParams();
       
@@ -69,29 +81,33 @@ const PropertyListPage: React.FC = () => {
         if (value && key !== 'sortBy') params.append(key, value);
       });
 
-      const response = await axios.get(`/properties?${params.toString()}`);
-      let sortedProperties = response.data;
+      params.append('limit', LIMIT.toString());
+      params.append('offset', (append ? offset : 0).toString());
 
-      // Sort properties
-      switch (filters.sortBy) {
-        case 'price-low':
-          sortedProperties.sort((a: Property, b: Property) => a.price - b.price);
-          break;
-        case 'price-high':
-          sortedProperties.sort((a: Property, b: Property) => b.price - a.price);
-          break;
-        case 'newest':
-        default:
-          sortedProperties.sort((a: Property, b: Property) => 
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
+      const response = await axios.get(`/properties?${params.toString()}`);
+      const { properties: newProperties, total: newTotal, hasMore: newHasMore } = response.data;
+
+      if (append) {
+        setProperties(prev => [...prev, ...newProperties]);
+        setOffset(prev => prev + newProperties.length);
+      } else {
+        setProperties(newProperties);
+        setOffset(newProperties.length);
       }
 
-      setProperties(sortedProperties);
+      setTotal(newTotal);
+      setHasMore(newHasMore);
     } catch (error) {
       console.error('Failed to fetch properties:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (!loadingMore && hasMore) {
+      fetchProperties(true);
     }
   };
 
@@ -486,19 +502,43 @@ const PropertyListPage: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className={
-            viewMode === 'grid' 
-              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'
-              : 'space-y-6'
-          }>
-            {properties.map((property) => (
-              <PropertyCard 
-                key={property._id} 
-                property={property} 
-                isListView={viewMode === 'list'} 
-              />
-            ))}
-          </div>
+          <>
+            <div className="mb-4 text-gray-400 text-sm">
+              Showing {properties.length} of {total} properties
+            </div>
+            <div className={
+              viewMode === 'grid' 
+                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'
+                : 'space-y-6'
+            }>
+              {properties.map((property) => (
+                <PropertyCard 
+                  key={property._id} 
+                  property={property} 
+                  isListView={viewMode === 'list'} 
+                />
+              ))}
+            </div>
+            
+            {hasMore && (
+              <div className="mt-12 text-center">
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="btn-primary btn-lg px-8"
+                >
+                  {loadingMore ? (
+                    <span className="flex items-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Loading...
+                    </span>
+                  ) : (
+                    `Load More (${total - properties.length} remaining)`
+                  )}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

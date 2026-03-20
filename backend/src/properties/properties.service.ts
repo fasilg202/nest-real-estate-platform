@@ -48,13 +48,24 @@ export class PropertiesService {
     if (bedrooms) filter.bedrooms = Number(bedrooms);
     if (bathrooms) filter.bathrooms = Number(bathrooms);
 
-    return this.propertyModel
-      .find(filter)
-      .populate('owner', 'firstName lastName email phone')
-      .sort({ createdAt: -1 })
-      .limit(Number(limit))
-      .skip(Number(offset))
-      .exec();
+    const [properties, total] = await Promise.all([
+      this.propertyModel
+        .find(filter)
+        .populate('owner', 'firstName lastName email phone')
+        .sort({ createdAt: -1 })
+        .limit(Number(limit))
+        .skip(Number(offset))
+        .exec(),
+      this.propertyModel.countDocuments(filter).exec()
+    ]);
+
+    return {
+      properties,
+      total,
+      limit: Number(limit),
+      offset: Number(offset),
+      hasMore: offset + properties.length < total
+    };
   }
 
   async findOne(id: string) {

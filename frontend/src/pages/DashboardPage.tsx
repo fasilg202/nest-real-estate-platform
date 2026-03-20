@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 import { 
   Home, 
   Plus, 
@@ -18,17 +19,64 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+interface Property {
+  _id: string;
+  title: string;
+  description: string;
+  price: number;
+  address: string;
+  city: string;
+  state: string;
+  propertyType: string;
+  listingType: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  squareFeet?: number;
+  images?: Array<{ url: string }>;
+  status: string;
+  createdAt: string;
+}
+
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for demonstration
+  useEffect(() => {
+    fetchMyProperties();
+  }, []);
+
+  const fetchMyProperties = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/properties/my-properties');
+      setProperties(response.data);
+    } catch (error) {
+      console.error('Failed to fetch properties:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this property?')) return;
+
+    try {
+      await axios.delete(`/properties/${id}`);
+      setProperties(properties.filter(p => p._id !== id));
+    } catch (error) {
+      console.error('Failed to delete property:', error);
+      alert('Failed to delete property');
+    }
+  };
+
   const stats = {
-    totalListings: 3,
-    totalViews: 1247,
-    inquiries: 18,
-    favorites: 7
+    totalListings: properties.length,
+    totalViews: 0, // Could be calculated from analytics
+    inquiries: 0, // Could come from contacts collection
+    favorites: 0 // Could come from favorites collection
   };
 
   const recentActivity = [
@@ -174,19 +222,93 @@ const DashboardPage: React.FC = () => {
 
         {activeTab === 'properties' && (
           <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-            <div className="text-center py-12">
-              <Home className="h-24 w-24 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Properties Yet</h3>
-              <p className="text-gray-600 mb-6">
-                Start building your portfolio by adding your first property listing.
-              </p>
-              <button
-                onClick={() => navigate('/properties/new')}
-                className="btn-primary"
-              >
-                Add Your First Property
-              </button>
-            </div>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+            ) : properties.length === 0 ? (
+              <div className="text-center py-12">
+                <Home className="h-24 w-24 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Properties Yet</h3>
+                <p className="text-gray-600 mb-6">
+                  Start building your portfolio by adding your first property listing.
+                </p>
+                <button
+                  onClick={() => navigate('/dashboard/add-property')}
+                  className="btn-primary"
+                >
+                  Add Your First Property
+                </button>
+              </div>
+            ) : (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-gray-900">My Properties ({properties.length})</h3>
+                  <button
+                    onClick={() => navigate('/dashboard/add-property')}
+                    className="btn-primary flex items-center"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    Add Property
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {properties.map((property) => (
+                    <div key={property._id} className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+                      <div className="relative h-48 bg-gray-200">
+                        {property.images && property.images.length > 0 ? (
+                          <img
+                            src={property.images[0].url}
+                            alt={property.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Home className="h-16 w-16 text-gray-400" />
+                          </div>
+                        )}
+                        <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded text-xs font-semibold">
+                          {property.status}
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <h4 className="font-semibold text-gray-900 mb-2 truncate">{property.title}</h4>
+                        <p className="text-sm text-gray-600 mb-2 flex items-center">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {property.city}, {property.state}
+                        </p>
+                        <p className="text-lg font-bold text-blue-600 mb-4">
+                          ${property.price.toLocaleString()}
+                          {property.listingType === 'RENT' && '/mo'}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => navigate(`/properties/${property._id}`)}
+                            className="flex-1 btn-secondary text-sm py-2"
+                          >
+                            <Eye className="h-4 w-4 inline mr-1" />
+                            View
+                          </button>
+                          <button
+                            onClick={() => navigate(`/properties/${property._id}/edit`)}
+                            className="flex-1 btn-primary text-sm py-2"
+                          >
+                            <Edit className="h-4 w-4 inline mr-1" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(property._id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

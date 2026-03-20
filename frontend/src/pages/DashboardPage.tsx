@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { 
   Home as HomeIcon, Plus, Edit, Trash2, Eye, MapPin, Bed, Bath, Square,
-  TrendingUp, DollarSign, BarChart3, Calendar
+  TrendingUp, BarChart3, Calendar
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -60,7 +60,6 @@ const DashboardPage: React.FC = () => {
   };
 
   const activeListings = properties.filter(p => p.status === 'ACTIVE').length;
-  const pendingListings = properties.filter(p => p.status === 'PENDING').length;
   const totalViews = properties.length * 120; // Mock data
 
   const formatPrice = (price: number, listingType: string) => {

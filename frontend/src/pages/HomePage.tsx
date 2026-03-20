@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
-  Search, MapPin, Home as HomeIcon, TrendingUp, Star, ChevronRight, 
+  Search, MapPin, Home as HomeIcon, Star, ChevronRight, 
   Shield, Clock, Users, Award, Bed, Bath, Square, Heart, Mail
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -48,7 +48,7 @@ const HomePage: React.FC = () => {
     {
       icon: Award,
       title: 'Best Prices',
-      description: 'Competitive pricing and exclusive deals you won't find anywhere else.',
+      description: 'Competitive pricing and exclusive deals you won\'t find anywhere else.',
     },
   ];
 

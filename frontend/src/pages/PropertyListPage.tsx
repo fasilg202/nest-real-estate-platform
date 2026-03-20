@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
-  Search, Filter, MapPin, Bed, Bath, Square, Heart, Grid, List, 
+  Search, MapPin, Grid, List, 
   SlidersHorizontal, DollarSign, X
 } from 'lucide-react';
 import axios from 'axios';

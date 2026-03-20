@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   MapPin, Bed, Bath, Square, Car, Heart, Share2, Phone, Mail, 
-  Calendar, Eye, ArrowLeft, ChevronLeft, ChevronRight, Check, Home, User
+  ArrowLeft, ChevronLeft, ChevronRight, Check, Home, User
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';

@@ -1,149 +1,124 @@
-import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Home, TrendingUp, Star, ChevronRight, Shield, Clock, Users, Bed, Bath, Square, Heart, ChevronLeft } from 'lucide-react';
+import React, { useState } from 'react';
+import { 
+  Search, MapPin, Home as HomeIcon, Star, ChevronRight, 
+  Shield, Clock, Users, Award, Bed, Bath, Square, Heart, Mail
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchLocation, setSearchLocation] = useState('');
   const [searchType, setSearchType] = useState('SALE');
-  const [isVisible, setIsVisible] = useState(false);
-  const [currentTrendingIndex, setCurrentTrendingIndex] = useState(0);
+  const [priceRange, setPriceRange] = useState('');
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
-  // Auto-scroll trending homes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTrendingIndex((prev) => (prev + 1) % 4);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams({
       listingType: searchType,
-      ...(searchQuery && { city: searchQuery }),
+      ...(searchLocation && { city: searchLocation }),
+      ...(priceRange && { maxPrice: priceRange }),
     });
     navigate(`/properties?${params.toString()}`);
   };
 
-  const featuredStats = [
-    { icon: Home, label: 'Properties Listed', value: '50,000+' },
-    { icon: MapPin, label: 'Cities Covered', value: '100+' },
-    { icon: TrendingUp, label: 'Happy Customers', value: '25,000+' },
-    { icon: Star, label: 'Average Rating', value: '4.9/5' },
+  // Stats Data
+  const stats = [
+    { value: '15,000+', label: 'Houses Available' },
+    { value: '12,000+', label: 'Houses Sold' },
+    { value: '2,500+', label: 'Trusted Agents' },
   ];
 
+  // Why Choose Us Features
   const features = [
     {
-      icon: Search,
-      title: 'Smart Search',
-      description: 'Advanced AI-powered search with intelligent filters to find your perfect home in seconds.',
-    },
-    {
       icon: Shield,
-      title: 'Verified Listings',
-      description: 'Every property is verified for authenticity, ensuring you see only genuine listings.',
+      title: 'Secure Transactions',
+      description: 'End-to-end encrypted transactions with verified listings and trusted agents.',
     },
     {
       icon: Clock,
-      title: 'Real-time Updates',
-      description: 'Get instant notifications for new listings and price changes in your areas of interest.',
+      title: 'Fast Process',
+      description: 'Streamlined workflows that get you from search to closing in record time.',
     },
     {
       icon: Users,
       title: 'Expert Support',
-      description: 'Connect with experienced real estate professionals for personalized guidance.',
-    }
-  ];
-
-  const testimonials = [
-    {
-      name: 'Sarah Johnson',
-      role: 'First-time Buyer',
-      image: 'https://images.unsplash.com/photo-1494790108755-2616b612b829?w=150&h=150&fit=crop&crop=face',
-      content: 'Nest made finding my dream home incredibly easy. The search filters are intuitive and the support team was amazing!',
-      rating: 5
+      description: 'Dedicated team of real estate professionals ready to guide you.',
     },
     {
-      name: 'Michael Chen',
-      role: 'Property Investor',
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-      content: 'As an investor, I need reliable data and quick access to new listings. Nest delivers on both fronts perfectly.',
-      rating: 5
+      icon: Award,
+      title: 'Best Prices',
+      description: 'Competitive pricing and exclusive deals you won\'t find anywhere else.',
     },
-    {
-      name: 'Emily Rodriguez',
-      role: 'Realtor',
-      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
-      content: 'The platform has revolutionized how I work with clients. The tools are professional and user-friendly.',
-      rating: 5
-    }
   ];
 
-  const popularCities = [
-    { name: 'San Francisco', properties: '12,450', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop' },
-    { name: 'New York', properties: '23,100', image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=300&h=200&fit=crop' },
-    { name: 'Los Angeles', properties: '18,200', image: 'https://images.unsplash.com/photo-1444927714506-8492d94b5ba0?w=300&h=200&fit=crop' },
-    { name: 'Chicago', properties: '9,800', image: 'https://images.unsplash.com/photo-1494522358652-f30e61a5328d?w=300&h=200&fit=crop' }
-  ];
-
-  const trendingHomes = [
+  // Featured Properties
+  const featuredProperties = [
     {
       id: 1,
-      price: 750000,
-      address: '2314 N Jackson St, Hutchinson, KS, 67502',
-      beds: 3,
-      baths: 2,
-      sqft: 1680,
-      image: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400&h=300&fit=crop',
-      status: 'Active',
-      timePosted: '11 hours ago',
-      priceChange: null,
-      favorite: false
-    },
-    {
-      id: 2,
+      image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&h=400&fit=crop',
       price: 425000,
-      address: '3321 Prairie Pkwy, Hutchinson, KS, 67502',
+      location: 'Beverly Hills, CA',
       beds: 4,
       baths: 3,
       sqft: 2044,
-      image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=300&fit=crop',
-      status: 'Active',
-      timePosted: '12 hours ago',
-      priceChange: { type: 'cut', amount: 7500 },
-      favorite: false
+      favorite: false,
+    },
+    {
+      id: 2,
+      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&h=400&fit=crop',
+      price: 750000,
+      location: 'San Francisco, CA',
+      beds: 3,
+      baths: 2,
+      sqft: 1680,
+      favorite: false,
     },
     {
       id: 3,
+      image: 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=600&h=400&fit=crop',
       price: 625000,
-      address: '2319 W Main St, Hutchinson, KS, 67502',
+      location: 'Los Angeles, CA',
       beds: 4,
       baths: 4,
       sqft: 2870,
-      image: 'https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=400&h=300&fit=crop',
-      status: 'Active',
-      timePosted: '1 day ago',
-      priceChange: null,
-      favorite: false
+      favorite: false,
     },
     {
       id: 4,
+      image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=600&h=400&fit=crop',
       price: 320000,
-      address: '1205 E 4th Ave, Hutchinson, KS, 67501',
+      location: 'Austin, TX',
       beds: 3,
       baths: 2,
       sqft: 1450,
-      image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&h=300&fit=crop',
-      status: 'Active',
-      timePosted: '2 days ago',
-      priceChange: { type: 'cut', amount: 5000 },
-      favorite: false
-    }
+      favorite: false,
+    },
+  ];
+
+  // Testimonials
+  const testimonials = [
+    {
+      name: 'Sarah Johnson',
+      location: 'Los Angeles, CA',
+      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b829?w=150&h=150&fit=crop&crop=face',
+      rating: 5,
+      text: 'Nest helped us find our dream home in just two weeks. The platform is intuitive and the agents are incredibly professional.',
+    },
+    {
+      name: 'Michael Chen',
+      location: 'San Francisco, CA',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+      rating: 5,
+      text: 'As a first-time buyer, I was nervous about the process. Nest made everything simple and stress-free. Highly recommend!',
+    },
+    {
+      name: 'Emily Rodriguez',
+      location: 'Seattle, WA',
+      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+      rating: 5,
+      text: 'The best real estate platform I\'ve used. Great selection of properties and excellent customer service throughout.',
+    },
   ];
 
   const formatPrice = (price: number) => {
@@ -160,355 +135,351 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen" style={{backgroundColor: '#0A0A0F'}}>
+    <div className="min-h-screen bg-cream">
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center dark-gradient dark-pattern overflow-hidden">
-        <div className="absolute inset-0" style={{backgroundColor: 'rgba(10, 10, 15, 0.5)'}}></div>
-        
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-20 h-20 bg-accent/5 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-32 right-16 w-32 h-32 bg-accent/3 rounded-full blur-2xl animate-pulse delay-1000"></div>
-        
-        <div className="relative container py-20">
-          <div className={`text-center mb-16 transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-100 mb-8 leading-tight">
-              Find Your
-              <span className="block gradient-text">
-                Dream Home
-              </span>
+      <section className="pt-32 pb-20 bg-gradient-to-br from-cream via-sand to-cream">
+        <div className="container">
+          <div className="max-w-4xl mx-auto text-center mb-12 animate-fade-in">
+            <h1 className="text-5xl md:text-7xl font-black text-dark mb-6 leading-tight">
+              Find Your Dream
+              <span className="block mt-2">Home Today</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-              Discover exceptional properties with our advanced search technology. 
-              From cozy apartments to luxury estates, your perfect home awaits.
+            <p className="text-xl text-dark-muted leading-relaxed">
+              Discover the perfect property from thousands of listings across the country.
+              Your next chapter starts here.
             </p>
           </div>
 
-          {/* Enhanced Search Bar */}
-          <div className={`max-w-5xl mx-auto transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            <form onSubmit={handleSearch} className="glass-dark rounded-2xl shadow-xl p-8">
-              <div className="flex flex-col lg:flex-row gap-6 items-end">
-                {/* Search Type Toggle */}
-                <div className="lg:w-auto">
-                  <label className="block text-sm font-semibold text-gray-300 mb-3">I want to</label>
-                  <div className="flex rounded-xl p-1.5" style={{backgroundColor: '#0A0A0F'}}>
-                    {['SALE', 'RENT'].map((type) => (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => setSearchType(type)}
-                        className={`px-8 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                          searchType === type
-                            ? 'bg-accent text-dark shadow-neon'
-                            : 'text-gray-400 hover:text-accent'
-                        }`}
-                      >
-                        {type === 'SALE' ? 'Buy' : 'Rent'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Search Input */}
-                <div className="flex-1 lg:min-w-0">
-                  <label className="block text-sm font-semibold text-gray-300 mb-3">Location</label>
+          {/* Search Bar */}
+          <div className="max-w-5xl mx-auto animate-slide-up">
+            <form onSubmit={handleSearch} className="bg-white rounded-2xl shadow-large p-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Location */}
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-semibold text-dark mb-2">Location</label>
                   <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-muted h-5 w-5" />
                     <input
                       type="text"
-                      placeholder="Enter city, neighborhood, or zip code"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="input-field pl-12"
+                      placeholder="City, ZIP..."
+                      value={searchLocation}
+                      onChange={(e) => setSearchLocation(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-taupe transition-colors"
                     />
                   </div>
                 </div>
 
+                {/* Type */}
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-semibold text-dark mb-2">Type</label>
+                  <select
+                    value={searchType}
+                    onChange={(e) => setSearchType(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-taupe transition-colors bg-white"
+                  >
+                    <option value="SALE">For Sale</option>
+                    <option value="RENT">For Rent</option>
+                  </select>
+                </div>
+
+                {/* Price Range */}
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-semibold text-dark mb-2">Max Price</label>
+                  <select
+                    value={priceRange}
+                    onChange={(e) => setPriceRange(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-taupe transition-colors bg-white"
+                  >
+                    <option value="">Any</option>
+                    <option value="300000">$300,000</option>
+                    <option value="500000">$500,000</option>
+                    <option value="750000">$750,000</option>
+                    <option value="1000000">$1,000,000</option>
+                    <option value="2000000">$2,000,000+</option>
+                  </select>
+                </div>
+
                 {/* Search Button */}
-                <button
-                  type="submit"
-                  className="btn-primary flex items-center gap-3 group"
-                >
-                  <Search className="h-5 w-5" />
-                  Search Properties
-                  <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </button>
+                <div className="md:col-span-1 flex items-end">
+                  <button
+                    type="submit"
+                    className="w-full btn-primary flex items-center justify-center space-x-2"
+                  >
+                    <Search className="h-5 w-5" />
+                    <span>Search</span>
+                  </button>
+                </div>
               </div>
             </form>
           </div>
 
-          {/* Quick Stats */}
-          <div className={`grid grid-cols-2 lg:grid-cols-4 gap-8 mt-16 transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            {featuredStats.map((stat, index) => (
-              <div key={index} className="text-center group">
-                <div className="glass-dark rounded-xl p-6 hover:border-accent/30 transition-all duration-300">
-                  <div className="bg-accent/10 rounded-lg p-3 mb-4 w-fit mx-auto">
-                    <stat.icon className="h-8 w-8 text-accent" />
-                  </div>
-                  <div className="text-3xl font-bold text-gray-100 mb-2">{stat.value}</div>
-                  <div className="text-gray-400 font-medium">{stat.label}</div>
-                </div>
+          {/* Stats Row */}
+          <div className="max-w-5xl mx-auto mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+            {stats.map((stat, index) => (
+              <div 
+                key={index} 
+                className="text-center animate-scale-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="text-4xl font-black text-dark mb-2">{stat.value}</div>
+                <div className="text-dark-muted font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Trending Homes Section */}
-      <section className="py-24 bg-surface">
+      {/* Why Choose Us Section */}
+      <section className="py-20 bg-sand">
         <div className="container">
-          <div className="flex items-center justify-between mb-16">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 gradient-text">
-                Trending Homes in Hutchinson, KS
-              </h2>
-              <p className="text-xl text-gray-300 max-w-3xl">
-                Viewed and saved the most in the area over the past 24 hours
-              </p>
-            </div>
-            <div className="hidden md:flex items-center space-x-4">
-              <button 
-                onClick={() => setCurrentTrendingIndex((prev) => (prev - 1 + trendingHomes.length) % trendingHomes.length)}
-                className="p-3 rounded-xl bg-dark-surface border border-dark-border hover:border-accent/30 transition-colors"
-              >
-                <ChevronLeft className="h-5 w-5 text-gray-400" />
-              </button>
-              <button 
-                onClick={() => setCurrentTrendingIndex((prev) => (prev + 1) % trendingHomes.length)}
-                className="p-3 rounded-xl bg-dark-surface border border-dark-border hover:border-accent/30 transition-colors"
-              >
-                <ChevronRight className="h-5 w-5 text-gray-400" />
-              </button>
-            </div>
+          <div className="text-center mb-16">
+            <h2 className="section-header">Why Choose Us</h2>
+            <p className="section-subtitle mx-auto">
+              We provide the best service in the industry with features designed for your success.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {trendingHomes.map((home, index) => (
-              <div 
-                key={home.id} 
-                className={`group cursor-pointer transition-all duration-500 transform ${
-                  index === currentTrendingIndex ? 'scale-105 z-10' : ''
-                }`}
-                onClick={() => navigate(`/property/${home.id}`)}
+            {features.map((feature, index) => (
+              <div key={index} className="card-feature text-center group">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <feature.icon className="h-8 w-8 text-dark" />
+                </div>
+                <h3 className="text-xl font-bold text-dark mb-3">{feature.title}</h3>
+                <p className="text-dark-muted leading-relaxed">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Popular Residences */}
+      <section className="py-20 bg-cream">
+        <div className="container">
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <h2 className="section-header">Popular Residences</h2>
+              <p className="section-subtitle">
+                Explore our handpicked selection of the finest properties available.
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/properties')}
+              className="hidden md:flex items-center space-x-2 text-dark font-semibold hover:text-taupe transition-colors"
+            >
+              <span>View All</span>
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredProperties.map((property) => (
+              <div
+                key={property.id}
+                className="property-card cursor-pointer"
+                onClick={() => navigate(`/properties/${property.id}`)}
               >
-                <div className="card overflow-hidden hover:shadow-neon transition-all duration-300">
-                  {/* Property Image */}
-                  <div className="relative">
-                    <img 
-                      src={home.image} 
-                      alt={home.address}
-                      className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    
-                    {/* Status Badge */}
-                    <div className="absolute top-4 left-4">
-                      {home.timePosted && (
-                        <span className="bg-accent text-dark-bg px-3 py-1 rounded-full text-sm font-semibold">
-                          {home.timePosted}
-                        </span>
-                      )}
-                    </div>
+                {/* Property Image */}
+                <div className="relative overflow-hidden h-64">
+                  <img
+                    src={property.image}
+                    alt={property.location}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                  />
+                  
+                  {/* Favorite Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Toggle favorite logic
+                    }}
+                    className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-soft hover:shadow-medium transition-all"
+                  >
+                    <Heart className={`h-5 w-5 ${property.favorite ? 'fill-red-500 text-red-500' : 'text-dark-muted'}`} />
+                  </button>
 
-                    {/* Price Cut Badge */}
-                    {home.priceChange && (
-                      <div className="absolute top-4 right-4">
-                        <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                          Price cut: ${formatNumber(home.priceChange.amount)}
-                        </span>
-                      </div>
-                    )}
+                  {/* Location Badge */}
+                  <div className="absolute bottom-4 left-4 flex items-center space-x-1 bg-white rounded-lg px-3 py-2 shadow-soft">
+                    <MapPin className="h-4 w-4 text-dark-muted" />
+                    <span className="text-sm font-medium text-dark">{property.location}</span>
+                  </div>
+                </div>
 
-                    {/* Favorite Button */}
-                    <button 
-                      className="absolute bottom-4 right-4 p-2 bg-white/80 hover:bg-white rounded-full transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Toggle favorite logic here
-                      }}
-                    >
-                      <Heart className={`h-5 w-5 ${home.favorite ? 'text-red-500 fill-current' : 'text-gray-600'}`} />
-                    </button>
+                {/* Property Details */}
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-2xl font-bold text-dark">
+                      {formatPrice(property.price)}
+                    </h3>
                   </div>
 
-                  {/* Property Details */}
-                  <div className="p-6">
-                    <div className="mb-4">
-                      <h3 className="text-2xl font-bold text-gray-100 mb-2">
-                        {formatPrice(home.price)}
-                      </h3>
-                      <p className="text-gray-400 text-sm leading-relaxed">
-                        {home.address}
-                      </p>
+                  {/* Property Stats */}
+                  <div className="flex items-center space-x-4 text-dark-muted">
+                    <div className="flex items-center space-x-1">
+                      <Bed className="h-4 w-4" />
+                      <span className="text-sm font-medium">{property.beds}</span>
                     </div>
-
-                    {/* Property Features */}
-                    <div className="flex items-center space-x-6 text-gray-400">
-                      <div className="flex items-center space-x-1">
-                        <Bed className="h-4 w-4" />
-                        <span className="text-sm">{home.beds} beds</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Bath className="h-4 w-4" />
-                        <span className="text-sm">{home.baths} baths</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Square className="h-4 w-4" />
-                        <span className="text-sm">{formatNumber(home.sqft)} sqft</span>
-                      </div>
+                    <div className="flex items-center space-x-1">
+                      <Bath className="h-4 w-4" />
+                      <span className="text-sm font-medium">{property.baths}</span>
                     </div>
-
-                    <div className="mt-4 pt-4 border-t border-dark-border">
-                      <span className="text-sm text-gray-400">{home.status}</span>
+                    <div className="flex items-center space-x-1">
+                      <Square className="h-4 w-4" />
+                      <span className="text-sm font-medium">{formatNumber(property.sqft)} sqft</span>
                     </div>
                   </div>
+
+                  {/* CTA Button */}
+                  <button className="w-full mt-6 btn-primary">
+                    View Details
+                  </button>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* View All Button */}
-          <div className="text-center mt-12">
+          {/* View All Button Mobile */}
+          <div className="mt-12 text-center md:hidden">
             <button
               onClick={() => navigate('/properties')}
-              className="btn-outline flex items-center gap-3 mx-auto group"
+              className="btn-outline flex items-center space-x-2 mx-auto"
             >
-              View All Properties
-              <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              <span>View All Properties</span>
+              <ChevronRight className="h-5 w-5" />
             </button>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-24" style={{backgroundColor: '#0A0A0F'}}>
-        <div className="container">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 gradient-text">
-              Why Choose Nest?
-            </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              We combine cutting-edge technology with personalized service to make your real estate journey seamless and successful.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {features.map((feature, index) => (
-              <div key={index} className="group">
-                <div className="card p-8 hover:shadow-neon transition-all duration-300">
-                  <div className="bg-accent/10 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <feature.icon className="h-8 w-8 text-accent" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-100 mb-4">{feature.title}</h3>
-                  <p className="text-gray-400 text-lg leading-relaxed">{feature.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Popular Cities */}
-      <section className="py-24 bg-surface">
+      {/* Testimonials Section */}
+      <section className="py-20 bg-white">
         <div className="container">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 gradient-text">
-              Explore Popular Cities
-            </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Discover amazing properties in the most sought-after locations across the country.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {popularCities.map((city, index) => (
-              <div key={index} className="group cursor-pointer" onClick={() => navigate(`/properties?city=${city.name}`)}>
-                <div className="relative overflow-hidden rounded-xl">
-                  <img 
-                    src={city.image} 
-                    alt={city.name}
-                    className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 transition-colors duration-300" style={{
-                    background: 'linear-gradient(to top, #0A0A0F, transparent, transparent)'
-                  }}></div>
-                  <div className="absolute bottom-6 left-6 text-white">
-                    <h3 className="text-2xl font-bold mb-1">{city.name}</h3>
-                    <p className="text-gray-200">{city.properties} properties</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-24" style={{backgroundColor: '#0A0A0F'}}>
-        <div className="container">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 gradient-text">
-              What Our Clients Say
-            </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Don't just take our word for it. Here's what real clients have to say about their experience with Nest.
+            <h2 className="section-header">What Our Clients Say</h2>
+            <p className="section-subtitle mx-auto">
+              Real stories from real people who found their dream homes with us.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="card p-8 hover:shadow-neon transition-all duration-300">
-                <div className="flex items-center mb-6">
-                  <img 
-                    src={testimonial.image} 
-                    alt={testimonial.name}
-                    className="w-16 h-16 rounded-full object-cover mr-4 ring-2 ring-accent/20"
-                  />
-                  <div>
-                    <h4 className="font-bold text-gray-100">{testimonial.name}</h4>
-                    <p className="text-gray-400">{testimonial.role}</p>
-                  </div>
-                </div>
-                <div className="flex mb-4">
+              <div key={index} className="bg-cream rounded-xl p-8">
+                {/* Stars */}
+                <div className="flex space-x-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-accent fill-current" />
+                    <Star key={i} className="h-5 w-5 text-dark fill-current" />
                   ))}
                 </div>
-                <p className="text-gray-300 italic leading-relaxed">"{testimonial.content}"</p>
+
+                {/* Testimonial Text */}
+                <p className="text-dark-muted leading-relaxed mb-6 italic">
+                  "{testimonial.text}"
+                </p>
+
+                {/* Author */}
+                <div className="flex items-center space-x-3">
+                  <img
+                    src={testimonial.avatar}
+                    alt={testimonial.name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  <div>
+                    <div className="font-bold text-dark">{testimonial.name}</div>
+                    <div className="text-sm text-dark-muted">{testimonial.location}</div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative py-24 dark-gradient dark-pattern overflow-hidden">
-        <div className="absolute inset-0" style={{backgroundColor: 'rgba(10, 10, 15, 0.5)'}}></div>
-        <div className="relative container text-center">
-          <h2 className="text-4xl md:text-6xl font-bold text-gray-100 mb-8">
-            Ready to Find Your 
-            <span className="block gradient-text">Perfect Home?</span>
-          </h2>
-          <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
-            Join thousands of satisfied customers who found their dream properties with Nest. 
-            Start your journey today and discover what makes us different.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <button
-              onClick={() => navigate('/properties')}
-              className="btn-primary"
-            >
-              Start Your Search
-            </button>
-            <button
-              onClick={() => navigate('/register')}
-              className="btn-secondary"
-            >
-              Join Nest Today
-            </button>
+      {/* Email CTA Section */}
+      <section className="py-20 bg-taupe">
+        <div className="container">
+          <div className="max-w-3xl mx-auto text-center text-white">
+            <Mail className="h-16 w-16 mx-auto mb-6" />
+            <h2 className="text-4xl md:text-5xl font-black mb-6">
+              Get Property Updates
+            </h2>
+            <p className="text-xl mb-8 opacity-90">
+              Subscribe to receive the latest listings and market insights directly to your inbox.
+            </p>
+            
+            <form className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 px-6 py-4 rounded-lg text-dark focus:outline-none focus:ring-2 focus:ring-white"
+                required
+              />
+              <button
+                type="submit"
+                className="bg-dark text-white px-8 py-4 rounded-lg font-semibold hover:bg-dark-muted transition-colors shadow-soft"
+              >
+                Subscribe
+              </button>
+            </form>
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-dark text-white py-16">
+        <div className="container">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            {/* About */}
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                <HomeIcon className="h-6 w-6" />
+                <span className="text-xl font-bold">Nest</span>
+              </div>
+              <p className="text-gray-400 leading-relaxed">
+                Your trusted partner in finding the perfect home. Making dreams come true since 2024.
+              </p>
+            </div>
+
+            {/* Support */}
+            <div>
+              <h3 className="font-bold text-lg mb-4">Support</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Help Center</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">FAQs</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+              </ul>
+            </div>
+
+            {/* Find Us */}
+            <div>
+              <h3 className="font-bold text-lg mb-4">Find Us</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Locations</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Careers</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Partners</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Press</a></li>
+              </ul>
+            </div>
+
+            {/* Social */}
+            <div>
+              <h3 className="font-bold text-lg mb-4">Connect</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Facebook</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Twitter</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Instagram</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">LinkedIn</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 Nest Real Estate Platform. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
 
-export default HomePage; 
+export default HomePage;

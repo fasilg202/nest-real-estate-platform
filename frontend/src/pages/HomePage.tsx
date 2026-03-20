@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, MapPin, Home as HomeIcon } from 'lucide-react';
+import { Search, MapPin, ArrowRight, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PropertyCard from '../components/PropertyCard';
 
@@ -24,255 +24,297 @@ const HomePage: React.FC = () => {
         ? prev.filter(favId => favId !== id)
         : [...prev, id]
     );
-    // TODO: Wire to backend POST/DELETE /api/favorites/:id when user is authenticated
   };
 
   const featuredProperties = [
     {
       id: 1,
-      price: 750000,
-      address: '2314 N Jackson St',
-      city: 'Hutchinson, KS 67502',
-      beds: 3,
-      baths: 2,
-      sqft: 1680,
-      image: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600&h=400&fit=crop',
+      price: 2850000,
+      address: 'The Pinnacle Penthouse',
+      city: 'Manhattan, NY 10022',
+      beds: 4,
+      baths: 4,
+      sqft: 4200,
+      image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop&q=80',
     },
     {
       id: 2,
-      price: 425000,
-      address: '3321 Prairie Pkwy',
-      city: 'Hutchinson, KS 67502',
-      beds: 4,
-      baths: 3,
-      sqft: 2044,
-      image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&h=400&fit=crop',
+      price: 1650000,
+      address: 'Coastal Modern Estate',
+      city: 'Malibu, CA 90265',
+      beds: 5,
+      baths: 5,
+      sqft: 5500,
+      image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&h=600&fit=crop&q=80',
     },
     {
       id: 3,
-      price: 625000,
-      address: '2319 W Main St',
-      city: 'Hutchinson, KS 67502',
-      beds: 4,
-      baths: 4,
-      sqft: 2870,
-      image: 'https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=600&h=400&fit=crop',
+      price: 3200000,
+      address: 'Historic Brownstone',
+      city: 'Brooklyn Heights, NY 11201',
+      beds: 6,
+      baths: 5,
+      sqft: 6800,
+      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop&q=80',
     },
     {
       id: 4,
-      price: 320000,
-      address: '1205 E 4th Ave',
-      city: 'Hutchinson, KS 67501',
-      beds: 3,
-      baths: 2,
-      sqft: 1450,
-      image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=600&h=400&fit=crop',
+      price: 1890000,
+      address: 'Glass & Steel Masterpiece',
+      city: 'Beverly Hills, CA 90210',
+      beds: 4,
+      baths: 5,
+      sqft: 4800,
+      image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&h=600&fit=crop&q=80',
     },
   ];
 
-
-
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-primary-50 bg-noise">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-neutral-50 to-white pt-24 pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-6xl font-bold text-neutral-900 mb-6">
-              Find Your Dream Home
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-100 via-accent-50 to-primary-50 opacity-60"></div>
+        
+        {/* Decorative elements */}
+        <div className="absolute top-20 right-20 w-96 h-96 bg-accent-200 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-20 left-20 w-80 h-80 bg-primary-200 rounded-full blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 w-full">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-primary-200/50 mb-8 animate-fade-in">
+              <Sparkles className="h-4 w-4 text-accent-600" />
+              <span className="text-sm font-medium text-neutral-700 tracking-wide">Curated Luxury Homes</span>
+            </div>
+
+            {/* Main heading */}
+            <h1 className="font-display text-display-2xl md:text-[6rem] text-neutral-900 mb-8 animate-slide-up leading-none">
+              Discover Your
+              <br />
+              <span className="text-accent-600 italic">Perfect Sanctuary</span>
             </h1>
-            <p className="text-xl text-neutral-600 max-w-2xl mx-auto">
-              Search millions of for-sale and rental listings, compare home values and connect with local professionals.
+
+            <p className="text-xl md:text-2xl text-neutral-600 mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              Exceptional properties in the world's most coveted locations, 
+              handpicked for the discerning buyer.
             </p>
-          </div>
 
-          {/* Search Bar */}
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-lg shadow-lg p-2">
-              <div className="flex flex-col md:flex-row gap-2">
-                {/* Search Type Tabs */}
-                <div className="flex border-b md:border-b-0 md:border-r border-neutral-200">
-                  <button
-                    type="button"
-                    onClick={() => setSearchType('SALE')}
-                    className={`flex-1 md:flex-none px-6 py-3 text-sm font-medium transition-colors ${
-                      searchType === 'SALE'
-                        ? 'text-primary-600 border-b-2 md:border-b-0 md:border-r-2 border-primary-600'
-                        : 'text-neutral-600 hover:text-neutral-900'
-                    }`}
-                  >
-                    Buy
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSearchType('RENT')}
-                    className={`flex-1 md:flex-none px-6 py-3 text-sm font-medium transition-colors ${
-                      searchType === 'RENT'
-                        ? 'text-primary-600 border-b-2 md:border-b-0 md:border-r-2 border-primary-600'
-                        : 'text-neutral-600 hover:text-neutral-900'
-                    }`}
-                  >
-                    Rent
-                  </button>
-                </div>
+            {/* Search Box */}
+            <div className="animate-scale-in" style={{ animationDelay: '0.4s' }}>
+              <form onSubmit={handleSearch} className="bg-white/80 backdrop-blur-md rounded-2xl shadow-elegant-xl border border-primary-100/50 p-3">
+                <div className="flex flex-col md:flex-row gap-3">
+                  {/* Search Type */}
+                  <div className="flex gap-2 md:border-r border-primary-200 pr-3">
+                    <button
+                      type="button"
+                      onClick={() => setSearchType('SALE')}
+                      className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                        searchType === 'SALE'
+                          ? 'bg-accent-600 text-white shadow-md'
+                          : 'text-neutral-600 hover:bg-primary-50'
+                      }`}
+                    >
+                      Buy
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSearchType('RENT')}
+                      className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                        searchType === 'RENT'
+                          ? 'bg-accent-600 text-white shadow-md'
+                          : 'text-neutral-600 hover:bg-primary-50'
+                      }`}
+                    >
+                      Rent
+                    </button>
+                  </div>
 
-                {/* Search Input */}
-                <form onSubmit={handleSearch} className="flex-1 flex gap-2">
+                  {/* Search Input */}
                   <div className="flex-1 relative">
-                    <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 h-5 w-5" />
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 h-5 w-5" />
                     <input
                       type="text"
-                      placeholder="Enter an address, neighborhood, city, or ZIP code"
+                      placeholder="Location, neighborhood, or address"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 text-neutral-900 placeholder-neutral-500 focus:outline-none"
+                      className="w-full pl-12 pr-4 py-3 bg-transparent text-neutral-900 placeholder-neutral-400 focus:outline-none text-lg"
                     />
                   </div>
+
+                  {/* Search Button */}
                   <button
                     type="submit"
-                    className="px-8 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium flex items-center gap-2"
+                    className="group px-8 py-3 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800 transition-all duration-200 font-medium flex items-center justify-center gap-2"
                   >
                     <Search className="h-5 w-5" />
-                    <span className="hidden sm:inline">Search</span>
+                    <span className="hidden sm:inline">Explore</span>
+                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </button>
-                </form>
+                </div>
+              </form>
+            </div>
+
+            {/* Quick stats */}
+            <div className="flex items-center justify-center gap-12 mt-16 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+              <div>
+                <div className="text-3xl font-display text-neutral-900 mb-1">$2.4B+</div>
+                <div className="text-sm text-neutral-600 tracking-wide uppercase">Properties Sold</div>
+              </div>
+              <div className="h-12 w-px bg-primary-200"></div>
+              <div>
+                <div className="text-3xl font-display text-neutral-900 mb-1">8,500+</div>
+                <div className="text-sm text-neutral-600 tracking-wide uppercase">Happy Clients</div>
+              </div>
+              <div className="h-12 w-px bg-primary-200"></div>
+              <div>
+                <div className="text-3xl font-display text-neutral-900 mb-1">125+</div>
+                <div className="text-sm text-neutral-600 tracking-wide uppercase">Cities</div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-neutral-400 rounded-full flex items-start justify-center p-2">
+            <div className="w-1 h-2 bg-neutral-400 rounded-full"></div>
           </div>
         </div>
       </section>
 
       {/* Featured Properties */}
-      <section className="py-16 bg-white">
+      <section className="relative py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-neutral-900 mb-2">
-                Homes For You
-              </h2>
-              <p className="text-neutral-600">
-                Based on your preferences and search history
-              </p>
+          {/* Section Header */}
+          <div className="text-center mb-20">
+            <div className="inline-block px-4 py-2 bg-primary-100 rounded-full mb-6">
+              <span className="text-sm font-medium text-accent-700 tracking-wide uppercase">Featured Collection</span>
             </div>
-            <button
-              onClick={() => navigate('/properties')}
-              className="text-primary-600 hover:text-primary-700 font-medium hidden md:block"
-            >
-              See all →
-            </button>
+            <h2 className="font-display text-display-lg md:text-display-xl text-neutral-900 mb-6">
+              Signature Properties
+            </h2>
+            <p className="text-xl text-neutral-600 max-w-2xl mx-auto">
+              Each residence tells a story of refined living, architectural excellence, and timeless elegance.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProperties.map((property) => (
-              <PropertyCard
+          {/* Properties Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {featuredProperties.map((property, index) => (
+              <div
                 key={property.id}
-                id={property.id}
-                price={property.price}
-                address={property.address}
-                city={property.city}
-                beds={property.beds}
-                baths={property.baths}
-                sqft={property.sqft}
-                image={property.image}
-                isFavorite={favorites.includes(property.id)}
-                onFavoriteToggle={handleFavoriteToggle}
-              />
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <PropertyCard
+                  {...property}
+                  isFavorite={favorites.includes(property.id)}
+                  onFavoriteToggle={handleFavoriteToggle}
+                />
+              </div>
             ))}
           </div>
 
-          <div className="text-center mt-8 md:hidden">
+          {/* View All Button */}
+          <div className="text-center mt-16">
             <button
               onClick={() => navigate('/properties')}
-              className="text-primary-600 hover:text-primary-700 font-medium"
+              className="group inline-flex items-center gap-3 px-8 py-4 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800 transition-all duration-200 font-medium"
             >
-              See all properties →
+              <span>View Full Collection</span>
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         </div>
       </section>
 
-      {/* How it Works */}
-      <section className="py-16 bg-neutral-50">
+      {/* Services Section */}
+      <section className="relative py-32 bg-primary-50 bg-grain">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-neutral-900 mb-4">
-              Whether you're buying, selling or renting, we can help you move forward.
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-lg shadow-sm">
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
-                <Search className="h-6 w-6 text-primary-600" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left Column - Text */}
+            <div>
+              <div className="inline-block px-4 py-2 bg-white rounded-full mb-6">
+                <span className="text-sm font-medium text-accent-700 tracking-wide uppercase">Concierge Service</span>
               </div>
-              <h3 className="text-xl font-bold text-neutral-900 mb-2">
-                Buy a home
-              </h3>
-              <p className="text-neutral-600 mb-4">
-                With over 1 million+ homes for sale available on the website, we can match you with a house you will want to call home.
+              <h2 className="font-display text-display-lg text-neutral-900 mb-8">
+                White-Glove
+                <br />
+                <span className="italic text-accent-600">Experience</span>
+              </h2>
+              <p className="text-lg text-neutral-600 mb-8 leading-relaxed">
+                From initial consultation to final closing, our dedicated team provides personalized guidance every step of the way. We understand that finding your perfect home is more than a transaction—it's a journey.
               </p>
+              <ul className="space-y-4 mb-12">
+                {[
+                  'Private viewings at your convenience',
+                  'Detailed market analysis and insights',
+                  'Negotiation expertise and advocacy',
+                  'Seamless closing coordination'
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-accent-100 flex items-center justify-center mt-0.5 flex-shrink-0">
+                      <div className="w-2 h-2 rounded-full bg-accent-600"></div>
+                    </div>
+                    <span className="text-neutral-700">{item}</span>
+                  </li>
+                ))}
+              </ul>
               <button
-                onClick={() => navigate('/properties?listingType=SALE')}
-                className="text-primary-600 hover:text-primary-700 font-medium"
+                onClick={() => navigate('/register')}
+                className="group inline-flex items-center gap-3 px-8 py-4 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800 transition-all duration-200 font-medium"
               >
-                Find a home →
+                <span>Begin Your Journey</span>
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
 
-            <div className="bg-white p-8 rounded-lg shadow-sm">
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
-                <HomeIcon className="h-6 w-6 text-primary-600" />
+            {/* Right Column - Image Composition */}
+            <div className="relative">
+              <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-elegant-xl">
+                <img
+                  src="https://images.unsplash.com/photo-1600607687644-c7171b42498b?w=600&h=750&fit=crop&q=80"
+                  alt="Luxury Interior"
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <h3 className="text-xl font-bold text-neutral-900 mb-2">
-                Sell a home
-              </h3>
-              <p className="text-neutral-600 mb-4">
-                No matter what path you take to sell your home, we can help you navigate a successful sale.
-              </p>
-              <button
-                onClick={() => navigate('/dashboard/add-property')}
-                className="text-primary-600 hover:text-primary-700 font-medium"
-              >
-                See your options →
-              </button>
-            </div>
-
-            <div className="bg-white p-8 rounded-lg shadow-sm">
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
-                <MapPin className="h-6 w-6 text-primary-600" />
+              {/* Floating card */}
+              <div className="absolute -bottom-8 -left-8 bg-white rounded-xl shadow-elegant-xl p-6 max-w-xs">
+                <div className="text-4xl font-display text-neutral-900 mb-2">98%</div>
+                <div className="text-neutral-600">Client satisfaction rate from verified buyers and sellers</div>
               </div>
-              <h3 className="text-xl font-bold text-neutral-900 mb-2">
-                Rent a home
-              </h3>
-              <p className="text-neutral-600 mb-4">
-                We're creating a seamless online experience – from shopping on the largest rental network, to applying, to paying rent.
-              </p>
-              <button
-                onClick={() => navigate('/properties?listingType=RENT')}
-                className="text-primary-600 hover:text-primary-700 font-medium"
-              >
-                Find rentals →
-              </button>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready to get started?
+      <section className="relative py-32 bg-neutral-900 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=1920&h=1080&fit=crop&q=80')] bg-cover bg-center opacity-10"></div>
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="font-display text-display-lg md:text-display-xl mb-8">
+            Ready to Find Your
+            <br />
+            <span className="italic text-accent-400">Dream Home?</span>
           </h2>
-          <p className="text-xl text-primary-100 mb-8">
-            Create an account to save your favorite homes and get personalized recommendations.
+          <p className="text-xl text-neutral-300 mb-12 max-w-2xl mx-auto">
+            Join thousands of satisfied clients who've found their perfect property with NestHome.
           </p>
-          <button
-            onClick={() => navigate('/register')}
-            className="px-8 py-3 bg-white text-primary-600 rounded-lg hover:bg-neutral-50 transition-colors font-medium text-lg"
-          >
-            Sign Up Free
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={() => navigate('/properties')}
+              className="px-8 py-4 bg-white text-neutral-900 rounded-xl hover:bg-neutral-100 transition-colors font-medium"
+            >
+              Explore Properties
+            </button>
+            <button
+              onClick={() => navigate('/register')}
+              className="px-8 py-4 bg-accent-600 text-white rounded-xl hover:bg-accent-700 transition-colors font-medium"
+            >
+              Create Account
+            </button>
+          </div>
         </div>
       </section>
     </div>

@@ -89,13 +89,13 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* Main heading */}
-            <h1 className="font-display text-display-2xl md:text-[6rem] text-neutral-900 mb-8 animate-slide-up leading-none">
+            <h1 className="font-display text-4xl md:text-6xl text-neutral-900 mb-8 animate-slide-up leading-tight">
               Discover Your
               <br />
               <span className="text-accent-600 italic">Perfect Sanctuary</span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-neutral-600 mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <p className="text-lg md:text-xl text-neutral-600 mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
               Exceptional properties in the world's most coveted locations, 
               handpicked for the discerning buyer.
             </p>
@@ -156,20 +156,20 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* Quick stats */}
-            <div className="flex items-center justify-center gap-12 mt-16 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+            <div className="flex items-center justify-center gap-8 mt-16 animate-fade-in" style={{ animationDelay: '0.6s' }}>
               <div>
-                <div className="text-3xl font-display text-neutral-900 mb-1">$2.4B+</div>
-                <div className="text-sm text-neutral-600 tracking-wide uppercase">Properties Sold</div>
+                <div className="text-2xl font-display text-neutral-900 mb-1">$2.4B+</div>
+                <div className="text-xs text-neutral-600 tracking-wide uppercase">Properties Sold</div>
               </div>
-              <div className="h-12 w-px bg-primary-200"></div>
+              <div className="h-10 w-px bg-primary-200"></div>
               <div>
-                <div className="text-3xl font-display text-neutral-900 mb-1">8,500+</div>
-                <div className="text-sm text-neutral-600 tracking-wide uppercase">Happy Clients</div>
+                <div className="text-2xl font-display text-neutral-900 mb-1">8,500+</div>
+                <div className="text-xs text-neutral-600 tracking-wide uppercase">Happy Clients</div>
               </div>
-              <div className="h-12 w-px bg-primary-200"></div>
+              <div className="h-10 w-px bg-primary-200"></div>
               <div>
-                <div className="text-3xl font-display text-neutral-900 mb-1">125+</div>
-                <div className="text-sm text-neutral-600 tracking-wide uppercase">Cities</div>
+                <div className="text-2xl font-display text-neutral-900 mb-1">125+</div>
+                <div className="text-xs text-neutral-600 tracking-wide uppercase">Cities</div>
               </div>
             </div>
           </div>
@@ -191,10 +191,10 @@ const HomePage: React.FC = () => {
             <div className="inline-block px-4 py-2 bg-primary-100 rounded-full mb-6">
               <span className="text-sm font-medium text-accent-700 tracking-wide uppercase">Featured Collection</span>
             </div>
-            <h2 className="font-display text-display-lg md:text-display-xl text-neutral-900 mb-6">
+            <h2 className="font-display text-3xl md:text-4xl text-neutral-900 mb-6">
               Signature Properties
             </h2>
-            <p className="text-xl text-neutral-600 max-w-2xl mx-auto">
+            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
               Each residence tells a story of refined living, architectural excellence, and timeless elegance.
             </p>
           </div>
@@ -238,7 +238,7 @@ const HomePage: React.FC = () => {
               <div className="inline-block px-4 py-2 bg-white rounded-full mb-6">
                 <span className="text-sm font-medium text-accent-700 tracking-wide uppercase">Concierge Service</span>
               </div>
-              <h2 className="font-display text-display-lg text-neutral-900 mb-8">
+              <h2 className="font-display text-3xl md:text-4xl text-neutral-900 mb-8">
                 White-Glove
                 <br />
                 <span className="italic text-accent-600">Experience</span>
@@ -293,12 +293,12 @@ const HomePage: React.FC = () => {
       <section className="relative py-32 bg-neutral-900 text-white overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=1920&h=1080&fit=crop&q=80')] bg-cover bg-center opacity-10"></div>
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display text-display-lg md:text-display-xl mb-8">
+          <h2 className="font-display text-3xl md:text-5xl mb-8">
             Ready to Find Your
             <br />
             <span className="italic text-accent-400">Dream Home?</span>
           </h2>
-          <p className="text-xl text-neutral-300 mb-12 max-w-2xl mx-auto">
+          <p className="text-lg text-neutral-300 mb-12 max-w-2xl mx-auto">
             Join thousands of satisfied clients who've found their perfect property with NestHome.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

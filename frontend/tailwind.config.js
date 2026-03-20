@@ -50,10 +50,10 @@ export default {
         'mono': ['JetBrains Mono', 'Menlo', 'monospace'],
       },
       fontSize: {
-        'display-2xl': ['4.5rem', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '300' }],
-        'display-xl': ['3.5rem', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '300' }],
-        'display-lg': ['2.75rem', { lineHeight: '1.2', letterSpacing: '-0.01em', fontWeight: '300' }],
-        'display-md': ['2rem', { lineHeight: '1.25', letterSpacing: '-0.01em', fontWeight: '400' }],
+        'display-2xl': ['3.5rem', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '300' }],
+        'display-xl': ['2.75rem', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '300' }],
+        'display-lg': ['2.25rem', { lineHeight: '1.2', letterSpacing: '-0.01em', fontWeight: '300' }],
+        'display-md': ['1.75rem', { lineHeight: '1.25', letterSpacing: '-0.01em', fontWeight: '400' }],
       },
       boxShadow: {
         'elegant': '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)',

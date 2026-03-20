@@ -7,6 +7,7 @@ import PropertyDetailPage from './pages/PropertyDetailPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import PropertyFormPage from './pages/PropertyFormPage';
 import SellPage from './pages/SellPage';
 import MortgagePage from './pages/MortgagePage';
 import AgentsPage from './pages/AgentsPage';
@@ -30,6 +31,9 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+              <Route path="/dashboard/add-property" element={<ProtectedRoute><PropertyFormPage mode="create" /></ProtectedRoute>} />
+              <Route path="/properties/new" element={<ProtectedRoute><PropertyFormPage mode="create" /></ProtectedRoute>} />
+              <Route path="/properties/:id/edit" element={<ProtectedRoute><PropertyFormPage mode="edit" /></ProtectedRoute>} />
               <Route path="/sell" element={<SellPage />} />
               <Route path="/mortgage" element={<MortgagePage />} />
               <Route path="/agents" element={<AgentsPage />} />

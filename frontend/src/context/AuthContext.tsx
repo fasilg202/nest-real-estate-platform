@@ -37,12 +37,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
+    const hydrateUser = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // You could validate the token with the backend here
-    }
-    setLoading(false);
+
+      try {
+        // Configurable endpoint: defaults to /auth/me, can override with env var
+        const endpoint = import.meta.env.VITE_AUTH_ME_ENDPOINT || '/auth/me';
+        const response = await axios.get(endpoint);
+        setUser(response.data);
+      } catch (error) {
+        console.error('Token validation failed:', error);
+        // Token is invalid or expired, clear it
+        localStorage.removeItem('token');
+        delete axios.defaults.headers.common['Authorization'];
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    hydrateUser();
   }, []);
 
   const login = async (email: string, password: string) => {

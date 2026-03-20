@@ -1,8 +1,10 @@
-import { Controller, Post, UseInterceptors, UploadedFile, UploadedFiles, BadRequestException } from '@nestjs/common';
+import { Controller, Post, UseInterceptors, UseGuards, UploadedFile, UploadedFiles, BadRequestException } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { UploadsService } from './uploads.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('uploads')
+@UseGuards(JwtAuthGuard)
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
 
